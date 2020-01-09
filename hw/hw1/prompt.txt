@@ -1,0 +1,20 @@
+Programming Assignment 1 - The ARITH language:
+
+In Haskell, or the language of your choice, write an interpreter for the ARITH language. Your program should consist of:
+
+A data structure for the abstract syntax tree (AST) of ARITH.
+A parser for ARITH. The parser should be in the form of a function called parse, which takes in a String and returns an AST. You may use external libraries when writing the parser. Remember to cite any code that you take from elsewhere.
+Do NOT use regular expressions to parse the string. The ARITH language is simple enough that this would work, but you will still have to worry about precedence... and you will be asked to write more complicated parsers later in the quarter. Please take the time to learn how to use a real parsing library.
+An interpreter for this AST.  The interpreter should be in the form of a function called eval, which takes in an AST and returns the result.
+Test cases which show that your AST, parser, and interpreter work.  These test cases should show good code coverage (i.e. test all cases).
+Finally, add a feature to your language, like subtraction or exponentiation.  This addition will involve modifying the AST, parser, and interpreter to support this new feature. You should also write new tests for this feature.
+The ARITH slides (course webpage » resources » slidesLinks to an external site.) should be a good starting point for the data structure and interpreter.  The parsing resources (course webpage » resources » parsingLinks to an external site.) should provide a good starting point for the parser.
+
+Your code will be tested via this testing script (Links to an external site.), so please ensure your submission also satisfies the following technical requirements:
+
+It contains a Makefile, such that running make in the root directory of your submission compiles a binary in the root directory called arith.
+This binary reads the ARITH language via stdin, parses it to an AST, evaluates the resulting AST, and writes the result to stdout.
+Your submission will be merged with this repository during testing, so ensure there are no filename conflicts.
+You may write your test cases by following the pattern in that repository; if you do, place them in the tests directory. You may execute all tests in the tests directory by running test.sh in the root directory, after merging.  Good test cases should make you (and me, the grader) feel confident that your program works. However, the provided test cases in the tests directory are not the only ones you will be tested on.
+
+Good luck!  
