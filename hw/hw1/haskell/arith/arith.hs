@@ -1,5 +1,5 @@
 -- ref: https://wiki.haskell.org/Parsing_a_simple_imperative_language?fbclid=IwAR2cvuYf6YlGhJNaTK6SGwqGk24GJY2Wc5IEG1p4OrBIgsOAzPg5ZGMLTDE
-module ParseArith where
+module Main where
 import Data.Either
 import System.IO
 import Control.Monad
@@ -44,8 +44,8 @@ aOperators = [  [Infix  (reservedOp "^"   >> return ExExp) AssocLeft]
 aTerm =  parens aExp
      <|> liftM IntExp integer
 
-parseString :: String -> Integer
-parseString str =
+parser :: String -> Integer
+parser str =
     let s = "(" ++ str ++ ")" in
         case parse arithParser "" s of
             Left e  -> error $ show e
@@ -55,3 +55,7 @@ test_eval :: Bool
 test_eval = let e = MulExp (SumExp (IntExp 3) (IntExp 5))
                            (IntExp 2) in
             (eval e) == 16 -- True
+
+main = do
+  line <- getLine
+  print (parser line)
