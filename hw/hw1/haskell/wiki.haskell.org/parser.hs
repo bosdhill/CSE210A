@@ -50,11 +50,12 @@ aOperators = [ [Infix  (reservedOp "*"   >> return MulExp) AssocLeft]
 aTerm =  parens aExp
      <|> liftM IntExp integer
 
-parseString :: String -> Exp
+parseString :: String -> Integer
 parseString str =
-   case parse arithParser "" str of
-     Left e  -> error $ show e
-     Right r -> r
+    let s = "(" ++ str ++ ")" in
+        case parse arithParser "" s of
+            Left e  -> error $ show e
+            Right r -> eval r
 
 parents :: Parser Exp
 parents = do
