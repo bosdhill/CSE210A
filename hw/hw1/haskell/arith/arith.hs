@@ -7,8 +7,6 @@ import Text.ParserCombinators.Parsec
 import Text.ParserCombinators.Parsec.Expr
 import Text.ParserCombinators.Parsec.Language
 import qualified Text.ParserCombinators.Parsec.Token as Token
-import Text.ParserCombinators.Parsec.Char (oneOf, char, digit, satisfy)
-import Text.ParserCombinators.Parsec.Combinator (many1, choice, chainl1)
 
 data Exp = IntExp Integer
             | SumExp Exp Exp
