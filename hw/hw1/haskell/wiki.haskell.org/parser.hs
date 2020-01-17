@@ -35,6 +35,7 @@ lexer = Token.makeTokenParser arithDef
 integer    = Token.integer    lexer -- parses an integer
 reservedOp = Token.reservedOp lexer -- parses an operator
 whiteSpace = Token.whiteSpace lexer -- parses whitespace
+parens     = Token.parens     lexer -- parses surrounding parenthesis:
 
 arithParser :: Parser Exp
 arithParser = whiteSpace >> aExp
@@ -46,13 +47,8 @@ aOperators = [ [Infix  (reservedOp "*"   >> return MulExp) AssocLeft]
               , [Infix  (reservedOp "+"   >> return SumExp) AssocLeft]
                ]
 
-aTerm = undefined
-    --     liftM IntExp integer
-    --  <|> do
-    --         a1 <- aExp
-    --         op <- aOperators
-    --         a2 <- aExp
-    --         return op a1 a2
+aTerm =  parens aExp
+     <|> liftM IntExp integer
 
 parseString :: String -> Exp
 parseString str =
@@ -60,13 +56,13 @@ parseString str =
      Left e  -> error $ show e
      Right r -> r
 
-parens :: Parser Exp
-parens = do
+parents :: Parser Exp
+parents = do
     e <- many1 digit
     return (IntExp (read e))
 
 parseStr :: String -> Integer
 parseStr str =
-   case parse parens "" str of
+   case parse parents "" str of
      Left e  -> error $ show e
      Right r -> eval r
