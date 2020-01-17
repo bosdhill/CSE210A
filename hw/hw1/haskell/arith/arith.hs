@@ -1,135 +1,58 @@
--- {-# LANGUAGE BlockArguments #-}
-import Text.ParserCombinators.ReadP
-import Data.Char
+-- ref: https://wiki.haskell.org/Parsing_a_simple_imperative_language?fbclid=IwAR2cvuYf6YlGhJNaTK6SGwqGk24GJY2Wc5IEG1p4OrBIgsOAzPg5ZGMLTDE
+module ParseArith where
+import Data.Either
+import System.IO
+import Control.Monad
+import Text.ParserCombinators.Parsec
+import Text.ParserCombinators.Parsec.Expr
+import Text.ParserCombinators.Parsec.Language
+import qualified Text.ParserCombinators.Parsec.Token as Token
+import Text.ParserCombinators.Parsec.Char (oneOf, char, digit, satisfy)
+import Text.ParserCombinators.Parsec.Combinator (many1, choice, chainl1)
 
-data Exp = IntExp Int
+data Exp = IntExp Integer
             | SumExp Exp Exp
             | MulExp Exp Exp
-            deriving (Show, Eq) --- value will be printable and comparable
+            deriving (Show, Eq)
 
-eval :: Exp -> Int
+eval :: Exp -> Integer
 eval (IntExp n)     = n
 eval (SumExp e1 e2) = (eval e1) + (eval e2)
 eval (MulExp e1 e2) = (eval e1) * (eval e2)
 
-parser:: String -> Maybe (String, a) --- Maybe -> may fail in parsing
-parser = undefined
+arithDef =
+   emptyDef { Token.reservedOpNames = ["+", "-"
+                                      ]
+            }
 
-isMul :: Char -> Bool
-isMul char =
-    any (char ==) "*"
+lexer = Token.makeTokenParser arithDef
 
-isAdd :: Char -> Bool
-isAdd char =
-    any (char ==) "+"
+integer    = Token.integer    lexer -- parses an integer
+reservedOp = Token.reservedOp lexer -- parses an operator
+whiteSpace = Token.whiteSpace lexer -- parses whitespace
+parens     = Token.parens     lexer -- parses surrounding parenthesis:
 
-parseMul :: ReadP Char
-parseMul =
-    satisfy isMul
+arithParser :: Parser Exp
+arithParser = whiteSpace >> aExp
 
-parseAdd :: ReadP Char
-parseAdd =
-    satisfy isAdd
+aExp :: Parser Exp
+aExp = buildExpressionParser aOperators aTerm
 
-parseInt :: ReadP Char
-parseInt =
-    satisfy isDigit
+aOperators = [ [Infix  (reservedOp "*"   >> return MulExp) AssocLeft]
+              , [Infix  (reservedOp "+"   >> return SumExp) AssocLeft]
+               ]
 
-atLeastOneMul :: ReadP [Char]
-atLeastOneMul =
-    many1 parseMul
+aTerm =  parens aExp
+     <|> liftM IntExp integer
 
-atLeastOneAdd :: ReadP [Char]
-atLeastOneAdd =
-    many1 parseAdd
-
-atLeastOneInt :: ReadP [Char]
-atLeastOneInt =
-    many1 parseInt
+parseString :: String -> Integer
+parseString str =
+    let s = "(" ++ str ++ ")" in
+        case parse arithParser "" s of
+            Left e  -> error $ show e
+            Right r -> eval r
 
 test_eval :: Bool
 test_eval = let e = MulExp (SumExp (IntExp 3) (IntExp 5))
                            (IntExp 2) in
             (eval e) == 16 -- True
-test_eval2 :: Bool
-test_eval2 = let e = IntExp 3 `SumExp` IntExp 5 in
-            (eval e) == 8 -- True
-
---- parser with https://en.wikibooks.org/wiki/Haskell/ParseExps ---
-
--- data Tree = Branch Tree Tree | Leaf deriving Show
-
--- leaf = do
---         char 'o'
---         return Leaf
-
--- -- num = do
--- --         any (char ==) ['0'..'9']
--- --         return Branch
-
--- brackets p = do
---                 char '('
---                 r <- p
---                 char ')'
---                 return r
-
--- branch = do a <- leaf -- +++ brackets tree
---             char '&'
---             b <- tree
---             return (Branch a b)
-
--- tree = leaf +++ branch -- +++ brackets tree
-
--- ref: https://en.wikibooks.org/wiki/Haskell/ParseExps
-brackets p = do char '('
-                r <- p
-                char ')'
-                return r
-
-data Operator = Add | Mul | Exp deriving Show
-operators = [(Add,'+'),(Mul,'*'),(Exp,'^')]
-
-data Tree = Branch Operator Tree Tree | Leaf String deriving Show
-
-leaf = do
-        s <- many1 (choice (map char ['0'..'9']))
-        return (Leaf s)
-
-tree = foldr (\(op,name) p ->
-                let this = p +++ do
-                                    a <- p +++ brackets tree
-                                    char name
-                                    b <- this
-                                    return (Branch op a b)
-                in this)
-            (leaf +++ brackets tree)
-            operators
-
--- ref: https://en.wikibooks.org/wiki/Haskell/ParseExps
-brackets p = do char '('
-                r <- p
-                char ')'
-                return r
-
-data Operator = Add | Mul | Exp deriving Show
-operators = [(Add,'+'),(Mul,'*'),(Exp,'^')]
-
-data Tree = Branch Operator Tree Tree | Leaf String deriving Show
-
-leaf = do
-        s <- many1 (choice (map char ['0'..'9']))
-        return (Leaf s)
-
-tree = foldr (\(op,name) p ->
-                let this = p +++ do
-                                    a <- p +++ brackets tree
-                                    char name
-                                    b <- this
-                                    return (Branch op a b)
-                in this)
-            (leaf +++ brackets tree)
-            operators
-
-
-
-
