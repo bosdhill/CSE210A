@@ -1,7 +1,8 @@
 {---------------------
 Program: arith.hs
-Authors: Bobby Dhillon
+Author: Bobby Dhillon
 ref: https://wiki.haskell.org/Parsing_a_simple_imperative_language?fbclid=IwAR2cvuYf6YlGhJNaTK6SGwqGk24GJY2Wc5IEG1p4OrBIgsOAzPg5ZGMLTDE
+     https://classes.soe.ucsc.edu/cse210a/Winter20/02-arith-bigstep.pdf
 ----------------------
 -}
 module Main where
@@ -47,13 +48,27 @@ aOperators = [  [Infix  (reservedOp "^"   >> return ExExp) AssocLeft]
 aTerm =  parens aExp
      <|> liftM IntExp integer
 
-parser :: String -> Integer
+parser :: String -> Exp
 parser str =
     let s = "(" ++ str ++ ")" in
         case parse arithParser "" s of
             Left e  -> error $ show e
-            Right r -> eval r
+            Right r -> r
 
 main = do
   line <- getLine
-  print (parser line)
+  print (eval (parser line))
+
+test_eval1 :: Bool
+test_eval1 = let e = MulExp (SumExp (IntExp 3) (IntExp 5)) (IntExp 2) in
+                    (eval e) == 16 -- True
+
+test_eval2 :: Bool
+test_eval2 = let e = ExExp (IntExp 2) (MulExp (IntExp 3) (IntExp 1)) in
+                    (eval e) == 8 -- True
+
+test_parse1 :: Bool
+test_parse1 = let e = "3 + 4 ^ 2" in (eval (parser e)) == 19 -- True
+
+test_parse2 :: Bool
+test_parse2 = let e = "- 3 + 4 ^ 2" in (eval (parser e)) == 13 -- True
