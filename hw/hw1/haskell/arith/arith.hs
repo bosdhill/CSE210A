@@ -13,18 +13,16 @@ import Text.ParserCombinators.Parsec.Combinator (many1, choice, chainl1)
 data Exp = IntExp Integer
             | SumExp Exp Exp
             | MulExp Exp Exp
+            | ExExp Exp Exp
             deriving (Show, Eq)
 
 eval :: Exp -> Integer
 eval (IntExp n)     = n
 eval (SumExp e1 e2) = (eval e1) + (eval e2)
 eval (MulExp e1 e2) = (eval e1) * (eval e2)
+eval (ExExp e1 e2)  = (eval e1) ^ (eval e2)
 
-arithDef =
-   emptyDef { Token.reservedOpNames = ["+", "-"
-                                      ]
-            }
-
+arithDef = emptyDef { Token.reservedOpNames = ["+", "-"] }
 lexer = Token.makeTokenParser arithDef
 
 integer    = Token.integer    lexer -- parses an integer
@@ -38,7 +36,8 @@ arithParser = whiteSpace >> aExp
 aExp :: Parser Exp
 aExp = buildExpressionParser aOperators aTerm
 
-aOperators = [ [Infix  (reservedOp "*"   >> return MulExp) AssocLeft]
+aOperators = [  [Infix  (reservedOp "^"   >> return ExExp) AssocLeft]
+              , [Infix  (reservedOp "*"   >> return MulExp) AssocLeft]
               , [Infix  (reservedOp "+"   >> return SumExp) AssocLeft]
                ]
 
