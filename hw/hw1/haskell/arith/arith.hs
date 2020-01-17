@@ -22,7 +22,7 @@ eval (SumExp e1 e2) = (eval e1) + (eval e2)
 eval (MulExp e1 e2) = (eval e1) * (eval e2)
 eval (ExExp e1 e2)  = (eval e1) ^ (eval e2)
 
-arithDef = emptyDef { Token.reservedOpNames = ["+", "-"] }
+arithDef = emptyDef { Token.reservedOpNames = ["+", "-", "^"] }
 lexer = Token.makeTokenParser arithDef
 
 integer    = Token.integer    lexer
