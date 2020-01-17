@@ -25,10 +25,10 @@ eval (ExExp e1 e2)  = (eval e1) ^ (eval e2)
 arithDef = emptyDef { Token.reservedOpNames = ["+", "-"] }
 lexer = Token.makeTokenParser arithDef
 
-integer    = Token.integer    lexer -- parses an integer
-reservedOp = Token.reservedOp lexer -- parses an operator
-whiteSpace = Token.whiteSpace lexer -- parses whitespace
-parens     = Token.parens     lexer -- parses surrounding parenthesis:
+integer    = Token.integer    lexer
+reservedOp = Token.reservedOp lexer
+whiteSpace = Token.whiteSpace lexer
+parens     = Token.parens     lexer
 
 arithParser :: Parser Exp
 arithParser = whiteSpace >> aExp
@@ -50,11 +50,6 @@ parser str =
         case parse arithParser "" s of
             Left e  -> error $ show e
             Right r -> eval r
-
-test_eval :: Bool
-test_eval = let e = MulExp (SumExp (IntExp 3) (IntExp 5))
-                           (IntExp 2) in
-            (eval e) == 16 -- True
 
 main = do
   line <- getLine
