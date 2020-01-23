@@ -57,10 +57,6 @@ eval_while state a b
 
 eval_assign :: M.Map String Integer -> String -> AExpr -> M.Map String Integer
 eval_assign state k v = M.insert k (eval_aexpr state v) state
-                        -- do
-                        --     let v' = (eval_aexpr state v) in
-                        --         let newState = M.insert k v' state in
-                        --             return newState
 
 eval_if :: M.Map String Integer -> BExpr -> Stmt -> Stmt -> M.Map String Integer
 eval_if state bexpr s1 s2
@@ -70,18 +66,18 @@ eval_if state bexpr s1 s2
 eval :: M.Map String Integer -> Stmt -> M.Map String Integer
 eval state s =
     case s of
-        Seq []     -> undefined -- print all values in hashtable
+        Seq []     -> state
         Seq x      -> do
                         let newState = eval state $ head x in
                             eval newState $ Seq $ tail x
         Assign a b -> eval_assign state a b
         If a b c   -> eval_if state a b c
         While a b  -> eval_while state a b
-        Skip       -> return state
+        Skip       -> state
 
 main :: IO ()
 main = do
     let state = M.fromList [] in
-        let m = eval state (parseString ("while true do skip")) in
-            let f result k a = result ++ "(" ++ (show k) ++ ":" ++ a in
+        let m = eval state (parseString ("x := 1; while x < 2 do x := x + 1")) in
+            let f result k a = result ++ "(" ++ k ++ ":" ++ (show a) in
                 putStrLn $ M.foldlWithKey f "Map: " m
