@@ -1,9 +1,9 @@
 module Main where
 import ParseWhile
 import WhileTypes
-import StateMap
-import Control.Monad.State
+import qualified Data.HashTable.IO as H
 -- https://stackoverflow.com/questions/22624924/how-do-i-print-the-name-and-value-of-a-custom-data-type-in-haskell
+-- https://hackage.haskell.org/package/hashtables-1.2.1.1/docs/Data-HashTable-IO.html
 -- What are the return types of a while program?
 -- Maybe error, IO(), etc.
 
@@ -18,7 +18,7 @@ eval_abinop op a1 a2 =
 eval_aexpr :: AExpr -> Integer
 eval_aexpr exp =
     case exp of
-        Var s            -> undefined -- hashmap
+        Var s            -> undefined
         IntConst c       -> c
         Neg aExp         -> eval_aexpr aExp
         ABinary op a1 a2 -> eval_abinop op a1 a2
@@ -49,7 +49,12 @@ eval_while a b
     | otherwise    = undefined
 
 -- eval_assign :: String -> AExpr
--- eval_assign var val =
+-- eval_assign var a = eval_expr a
+
+eval_if :: BExpr -> Stmt -> Stmt -> IO()
+eval_if bexpr s1 s2
+    | eval_bexpr bexpr = eval s1
+    | otherwise        = eval s2
 
 eval :: Stmt -> IO()
 eval s =
@@ -57,7 +62,9 @@ eval s =
         Assign a b -> undefined
         If a b c   -> undefined
         While a b  -> eval_while a b
-        Skip       -> return ()
+        Skip       -> return () -- how to evaluate the next statement?
+        _          -> undefined
 
 main :: IO ()
-main = eval (parseString ("x := 1; x := 1; while x < 3 do skip"))
+main =
+    eval (parseString ("x := 1; x := 1; while x < 3 do skip"))
