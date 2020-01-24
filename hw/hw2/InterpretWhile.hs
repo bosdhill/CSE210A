@@ -71,14 +71,3 @@ eval state s =
         If a b c   -> eval_if state a b c
         While a b  -> eval_while state a b
         Skip       -> state
-
--- main :: IO ()
--- main = do
---     stmt <- getLine
---     let state = M.fromList [] in
---         let m = eval state (parseString stmt) in
---             let f result k a =
---                     case result of
---                         "{"       -> result ++ k ++ " → " ++ (show a)
---                         otherwise -> result ++ ", " ++ k ++ " → " ++ (show a) in
---                 putStrLn ((M.foldlWithKey f "{" m) ++ "}")
