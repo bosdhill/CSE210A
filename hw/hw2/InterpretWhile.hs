@@ -73,7 +73,11 @@ eval state s =
 
 main :: IO ()
 main = do
+    stmt <- getLine
     let state = M.fromList [] in
-        let m = eval state (parseString ("i:=5; fact := 1; while 0<i do { fact := fact * i; i := i - 1 }")) in
-            let f result k a = result ++ k ++ " → " ++ (show a) ++ ", " in
+        let m = eval state (parseString stmt) in
+            let f result k a =
+                    case result of
+                        "{"       -> result ++ k ++ " → " ++ (show a)
+                        otherwise -> result ++ ", " ++ k ++ " → " ++ (show a) in
                 putStrLn ((M.foldlWithKey f "{" m) ++ "}")
