@@ -21,7 +21,7 @@ eval_abinop state op a1 a2 =
         Add      -> (eval_aexpr state a1) + (eval_aexpr state a2)
         Subtract -> (eval_aexpr state a1) - (eval_aexpr state a2)
         Multiply -> (eval_aexpr state a1) * (eval_aexpr state a2)
-        -- Divide   -> (eval_aexpr a1) / (eval_aexpr a2)
+        Exp      -> (eval_aexpr state a1) ^ (eval_aexpr state a2)
 
 eval_aexpr :: M.Map String Integer -> AExpr -> Integer
 eval_aexpr state exp =

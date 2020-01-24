@@ -35,7 +35,7 @@ languageDef =
                                       , "="
                                       ]
             , Token.reservedOpNames = ["+", "-", "*", "/", ":=", "="
-                                      , "<", ">", "∧", "∨", "¬"
+                                      , "<", ">", "∧", "∨", "¬", "^"
                                       ]
             }
 
@@ -101,7 +101,8 @@ aExpression = buildExpressionParser aOperators aTerm
 bExpression :: Parser BExpr
 bExpression = buildExpressionParser bOperators bTerm
 
-aOperators = [ [Prefix (reservedOp "-"   >> return (Neg             ))          ]
+aOperators = [ [Prefix (reservedOp "-"   >> return (Neg             ))          ],
+                [Infix  (reservedOp "^"   >> return (ABinary Exp     )) AssocLeft]
               , [Infix  (reservedOp "*"   >> return (ABinary Multiply)) AssocLeft,
                  Infix  (reservedOp "/"   >> return (ABinary Divide  )) AssocLeft]
               , [Infix  (reservedOp "+"   >> return (ABinary Add     )) AssocLeft,

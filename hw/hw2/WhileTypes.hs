@@ -26,6 +26,7 @@ data ABinOp = Add
              | Subtract
              | Multiply
              | Divide
+             | Exp
              deriving (Show)
 
 data Stmt = Seq [Stmt]
