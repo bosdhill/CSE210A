@@ -41,14 +41,14 @@ languageDef =
 
 lexer = Token.makeTokenParser languageDef
 
-identifier = Token.identifier lexer -- parses an identifier
-parens     = Token.parens lexer -- parsers parenthesis
-reserved   = Token.reserved   lexer -- parses a reserved name
-reservedOp = Token.reservedOp lexer -- parses an operator
-braces     = Token.braces     lexer -- parses surrounding braces
-integer    = Token.integer    lexer -- parses an integer
-semi       = Token.semi       lexer -- parses a semicolon
-whiteSpace = Token.whiteSpace lexer -- parses whitespace
+identifier = Token.identifier lexer
+parens     = Token.parens     lexer
+reserved   = Token.reserved   lexer
+reservedOp = Token.reservedOp lexer
+braces     = Token.braces     lexer
+integer    = Token.integer    lexer
+semi       = Token.semi       lexer
+whiteSpace = Token.whiteSpace lexer
 
 whileParser :: Parser Stmt
 whileParser = whiteSpace >> statement
@@ -59,7 +59,6 @@ statement =  braces statement
 
 sequenceOfStmt = do
       list <- (sepBy1 statement' semi)
-      -- If there's only one statement return it without using Seq.
       return $ if length list == 1 then head list else Seq list
 
 statement' :: Parser Stmt
