@@ -5,8 +5,6 @@ import qualified Data.Map as M
 -- https://stackoverflow.com/questions/22624924/how-do-i-print-the-name-and-value-of-a-custom-data-type-in-haskell
 -- https://hackage.haskell.org/package/hashtables-1.2.1.1/docs/Data-HashTable-IO.html
 -- https://stackoverflow.com/questions/27660791/insert-value-into-a-map-and-then-return-it
--- What are the return types of a while program?
--- Maybe error, IO(), etc.
 
 eval_abinop :: M.Map String Integer -> ABinOp -> AExpr -> AExpr -> Integer
 eval_abinop state op a1 a2 =
@@ -52,8 +50,8 @@ eval_bexpr state a =
 
 eval_while :: M.Map String Integer -> BExpr -> Stmt -> M.Map String Integer
 eval_while state a b
-    | eval_bexpr state a = eval state b
-    | otherwise          = undefined
+    | eval_bexpr state a = eval (eval state b) (While a b)
+    | otherwise          = state
 
 eval_assign :: M.Map String Integer -> String -> AExpr -> M.Map String Integer
 eval_assign state k v = M.insert k (eval_aexpr state v) state
@@ -67,9 +65,7 @@ eval :: M.Map String Integer -> Stmt -> M.Map String Integer
 eval state s =
     case s of
         Seq []     -> state
-        Seq x      -> do
-                        let newState = eval state $ head x in
-                            eval newState $ Seq $ tail x
+        Seq x      -> eval (eval state $ head x) $ Seq $ tail x
         Assign a b -> eval_assign state a b
         If a b c   -> eval_if state a b c
         While a b  -> eval_while state a b
@@ -78,6 +74,6 @@ eval state s =
 main :: IO ()
 main = do
     let state = M.fromList [] in
-        let m = eval state (parseString ("x := 1; while x < 2 do x := x + 1")) in
-            let f result k a = result ++ "(" ++ k ++ ":" ++ (show a) in
-                putStrLn $ M.foldlWithKey f "Map: " m
+        let m = eval state (parseString ("i:=5; fact := 1; while 0<i do { fact := fact * i; i := i - 1 }")) in
+            let f result k a = result ++ k ++ " → " ++ (show a) ++ ", " in
+                putStrLn ((M.foldlWithKey f "{" m) ++ "}")
