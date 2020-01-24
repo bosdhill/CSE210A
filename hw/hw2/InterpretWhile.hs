@@ -1,10 +1,19 @@
+{---------------------
+Program: InterpretWhile.hs
+Author: Bobby Dhillon
+ref: https://stackoverflow.com/questions/27660791/insert-value-into-a-map-and-then-return-it
+----------------------
+-}
 module InterpretWhile where
 import ParseWhile
 import WhileTypes
 import qualified Data.Map as M
--- https://stackoverflow.com/questions/22624924/how-do-i-print-the-name-and-value-of-a-custom-data-type-in-haskell
--- https://hackage.haskell.org/package/hashtables-1.2.1.1/docs/Data-HashTable-IO.html
--- https://stackoverflow.com/questions/27660791/insert-value-into-a-map-and-then-return-it
+
+lookupState :: M.Map String Integer -> String -> Integer
+lookupState state k =
+    case M.lookup k state of
+        Nothing  -> 0
+        Just val -> val
 
 eval_abinop :: M.Map String Integer -> ABinOp -> AExpr -> AExpr -> Integer
 eval_abinop state op a1 a2 =
@@ -13,12 +22,6 @@ eval_abinop state op a1 a2 =
         Subtract -> (eval_aexpr state a1) - (eval_aexpr state a2)
         Multiply -> (eval_aexpr state a1) * (eval_aexpr state a2)
         -- Divide   -> (eval_aexpr a1) / (eval_aexpr a2)
-
-lookupState :: M.Map String Integer -> String -> Integer
-lookupState state k =
-    case M.lookup k state of
-        Nothing  -> 0
-        Just val -> val
 
 eval_aexpr :: M.Map String Integer -> AExpr -> Integer
 eval_aexpr state exp =

@@ -1,3 +1,8 @@
+{---------------------
+Program: Main.hs
+Author: Bobby Dhillon
+----------------------
+-}
 module Main where
 import InterpretWhile
 import ParseWhile
