@@ -8,7 +8,7 @@ data BExpr = BoolConst Bool
 
 data BBinOp = And | Or deriving (Show)
 
-data RBinOp = Greater | Less deriving (Show)
+data RBinOp = Greater | Less | Equal deriving (Show)
 
 data AExpr = Var String
             | IntConst Integer

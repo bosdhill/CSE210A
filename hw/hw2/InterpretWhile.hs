@@ -1,4 +1,4 @@
-module Main where
+module InterpretWhile where
 import ParseWhile
 import WhileTypes
 import qualified Data.Map as M
@@ -25,7 +25,7 @@ eval_aexpr state exp =
     case exp of
         Var s            -> lookupState state s
         IntConst c       -> c
-        Neg aExp         -> eval_aexpr state aExp
+        Neg aExp         -> - eval_aexpr state aExp
         ABinary op a1 a2 -> eval_abinop state op a1 a2
 
 eval_rbinary :: M.Map String Integer -> RBinOp -> AExpr -> AExpr -> Bool
@@ -33,12 +33,13 @@ eval_rbinary state op a1 a2 =
     case op of
         Greater -> (eval_aexpr state a1) > (eval_aexpr state a2)
         Less    -> (eval_aexpr state a1) < (eval_aexpr state a2)
+        Equal   -> (eval_aexpr state a1) == (eval_aexpr state a2)
 
 eval_bbinary :: M.Map String Integer -> BBinOp -> BExpr -> BExpr -> Bool
 eval_bbinary state op b1 b2 =
     case op of
-        And -> (eval_bexpr state b1) && (eval_bexpr state b2)
-        Or  -> (eval_bexpr state b1) || (eval_bexpr state b2)
+        And   -> (eval_bexpr state b1) && (eval_bexpr state b2)
+        Or    -> (eval_bexpr state b1) || (eval_bexpr state b2)
 
 eval_bexpr :: M.Map String Integer -> BExpr -> Bool
 eval_bexpr state a =
@@ -71,13 +72,13 @@ eval state s =
         While a b  -> eval_while state a b
         Skip       -> state
 
-main :: IO ()
-main = do
-    stmt <- getLine
-    let state = M.fromList [] in
-        let m = eval state (parseString stmt) in
-            let f result k a =
-                    case result of
-                        "{"       -> result ++ k ++ " → " ++ (show a)
-                        otherwise -> result ++ ", " ++ k ++ " → " ++ (show a) in
-                putStrLn ((M.foldlWithKey f "{" m) ++ "}")
+-- main :: IO ()
+-- main = do
+--     stmt <- getLine
+--     let state = M.fromList [] in
+--         let m = eval state (parseString stmt) in
+--             let f result k a =
+--                     case result of
+--                         "{"       -> result ++ k ++ " → " ++ (show a)
+--                         otherwise -> result ++ ", " ++ k ++ " → " ++ (show a) in
+--                 putStrLn ((M.foldlWithKey f "{" m) ++ "}")

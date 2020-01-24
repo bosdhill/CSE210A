@@ -20,6 +20,7 @@ languageDef =
             , Token.commentLine     = "//"
             , Token.identStart      = letter
             , Token.identLetter     = alphaNum
+            , Token.opLetter        = oneOf "=" -- thanks to Michael C.
             , Token.reservedNames   = [ "if"
                                       , "then"
                                       , "else"
@@ -28,18 +29,20 @@ languageDef =
                                       , "skip"
                                       , "true"
                                       , "false"
-                                      , "not"
-                                      , "and"
-                                      , "or"
+                                      , "¬"
+                                      , "∧"
+                                      , "∨"
+                                      , "="
                                       ]
-            , Token.reservedOpNames = ["+", "-", "*", "/", ":="
-                                      , "<", ">", "and", "or", "not"
+            , Token.reservedOpNames = ["+", "-", "*", "/", ":=", "="
+                                      , "<", ">", "∧", "∨", "¬"
                                       ]
             }
 
 lexer = Token.makeTokenParser languageDef
 
 identifier = Token.identifier lexer -- parses an identifier
+parens     = Token.parens lexer -- parsers parenthesis
 reserved   = Token.reserved   lexer -- parses a reserved name
 reservedOp = Token.reservedOp lexer -- parses an operator
 braces     = Token.braces     lexer -- parses surrounding braces
@@ -106,16 +109,16 @@ aOperators = [ [Prefix (reservedOp "-"   >> return (Neg             ))          
                  Infix  (reservedOp "-"   >> return (ABinary Subtract)) AssocLeft]
                ]
 
-bOperators = [ [Prefix (reservedOp "not" >> return (Not             ))          ]
-              , [Infix  (reservedOp "and" >> return (BBinary And     )) AssocLeft,
-                 Infix  (reservedOp "or"  >> return (BBinary Or      )) AssocLeft]
+bOperators = [ [Prefix (reservedOp "¬" >> return (Not             ))          ]
+              , [Infix  (reservedOp "∧" >> return (BBinary And     )) AssocLeft,
+                 Infix  (reservedOp "∨"  >> return (BBinary Or      )) AssocLeft]
               ]
 
 aTerm =   braces aExpression
       <|> liftM Var identifier
       <|> liftM IntConst integer
 
-bTerm =   braces bExpression
+bTerm =   parens bExpression
       <|> (reserved "true"  >> return (BoolConst True ))
       <|> (reserved "false" >> return (BoolConst False))
       <|> rExpression
@@ -128,6 +131,7 @@ rExpression =
 
 relation =  (reservedOp ">" >> return Greater)
         <|> (reservedOp "<" >> return Less)
+        <|> (reservedOp "=" >> return Equal)
 
 parseString :: String -> Stmt
 parseString str =
