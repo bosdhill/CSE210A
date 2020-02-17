@@ -121,9 +121,11 @@ bTerm =   parens bExpression
       <|> rExpression
 
 rExpression =
-   do a1 <- aExpression
+   do a1 <-    aExpression
+         <|>   parens aExpression
       op <- relation
-      a2 <- aExpression
+      a2 <-    aExpression
+         <|>   parens aExpression
       return $ RBinary op a1 a2
 
 relation =  (reservedOp ">" >> return Greater)
