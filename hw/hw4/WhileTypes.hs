@@ -9,6 +9,8 @@ import qualified Data.Map as M
 
 -- data AST = M
 
+type Steps = [(Stmt, M.Map String Integer)]
+
 data BExpr = BoolConst Bool
     | Not BExpr
     | BBinary BBinOp BExpr BExpr
