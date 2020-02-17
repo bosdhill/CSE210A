@@ -5,6 +5,9 @@ ref: https://wiki.haskell.org/Parsing_a_simple_imperative_language?fbclid=IwAR2c
 ----------------------
 -}
 module WhileTypes where
+import qualified Data.Map as M
+
+-- data AST = M
 
 data BExpr = BoolConst Bool
     | Not BExpr
@@ -31,6 +34,15 @@ data Stmt = Seq [Stmt]
            | If BExpr Stmt Stmt
            | While BExpr Stmt
            | Skip
+
+-- -- Need to convert to lexographic order by key
+-- Need [(Stmt, M)]
+-- formatter result k a = case result of
+--         "{"       -> result ++ k ++ " → " ++ (show a)
+--         otherwise -> result ++ ", " ++ k ++ " → " ++ (show a)
+
+-- instance Show AST where
+--     show AST m = (M.foldlWithKey formatter "{" m) ++ "}"
 
 instance Show AExpr where
   show (IntConst n) = show n
