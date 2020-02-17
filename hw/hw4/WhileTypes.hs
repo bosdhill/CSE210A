@@ -8,8 +8,8 @@ module WhileTypes where
 import qualified Data.Map as M
 
 -- data AST = M
-
-type Steps = [(Stmt, M.Map String Integer)]
+type State = M.Map String Integer
+type Steps = [(Stmt, State)]
 
 data BExpr = BoolConst Bool
     | Not BExpr
@@ -38,6 +38,7 @@ data Stmt = Seq [Stmt]
            | Skip
 
 -- -- Need to convert to lexographic order by key
+-- printMap function?
 -- Need [(Stmt, M)]
 -- formatter result k a = case result of
 --         "{"       -> result ++ k ++ " → " ++ (show a)
