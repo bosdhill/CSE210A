@@ -15,10 +15,7 @@ import Text.ParserCombinators.Parsec.Language
 import qualified Text.ParserCombinators.Parsec.Token as Token
 
 languageDef =
-   emptyDef { Token.commentStart    = "/*"
-            , Token.commentEnd      = "*/"
-            , Token.commentLine     = "//"
-            , Token.identStart      = letter
+   emptyDef { Token.identStart      = letter
             , Token.identLetter     = alphaNum
             , Token.opLetter        = oneOf "=" -- thanks to Michael C.
             , Token.reservedNames   = [ "if"
@@ -114,7 +111,7 @@ bOperators = [ [Prefix (reservedOp "¬" >> return (Not             ))          ]
                  Infix  (reservedOp "∨"  >> return (BBinary Or      )) AssocLeft]
               ]
 
-aTerm =   braces aExpression
+aTerm =   parens aExpression
       <|> liftM Var identifier
       <|> liftM IntConst integer
 
