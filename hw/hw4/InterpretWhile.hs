@@ -80,17 +80,31 @@ eval_assign_small :: State -> String -> AExpr -> Step
 eval_assign_small state k v =
     do let v' = (eval_aexpr state v)
        let state' = M.insert k v' state
-       ((Assign k (IntConst v')), state')
+       (Skip, state')
+
+eval_if_small :: State -> BExpr -> Stmt -> Stmt -> Step
+eval_if_small state bexpr s1 s2
+    | eval_bexpr state bexpr = (s1, state)
+    | otherwise              = (s2, state)
 
 
 eval1 :: State -> Stmt -> Steps -> Steps
-eval1 state st steps =
-    case st of
-        Assign a b -> do let (stmt, state') = eval_assign_small state a b
-                         steps ++ [(stmt, state')]
+eval1 state stmt steps =
+    case stmt of
+        Assign a b -> do let (stmt', state') = eval_assign_small state a b
+                         let steps' = steps ++ [(stmt', state')]
+                         eval1 state' stmt' steps'
+        If a b c   -> do let (stmt', state') = eval_if_small state a b c
+                         let steps' = steps ++ [(stmt', state')]
+                         eval1 state' stmt' steps'
         _          -> steps
 
-test_eval1 :: IO()
-test_eval1 =
+test_assign :: IO()
+test_assign =
     do let steps = eval1 (M.fromList []) (Assign "x" (IntConst 3)) ([(Skip, M.empty)])
+       putStrLn (printSteps steps)
+
+test_if :: IO()
+test_if =
+    do let steps = eval1 (M.fromList []) (parseString "if x=0 ∧ y < 4 then x:= 1 else x:= 3") ([(Skip, M.empty)])
        putStrLn (printSteps steps)
