@@ -102,13 +102,14 @@ eval1 state stmt steps =
     case stmt of
         Assign a b -> do let (stmt', state') = eval_assign_small state a b
                          steps ++ [(stmt', state')]
-        If a b c   -> do let (stmt', state') = eval_if_small state a b c
-                         let steps' = steps ++ [(stmt', state')]
+        If a b c   -> do 
+                      let (stmt', state') = eval_if_small state a b c
+                      let steps' = steps ++ [(stmt', state')]
+                      if length steps < 9999 then
                          eval1 state' stmt' steps'
-        While a b  -> if length steps < 10000 then 
-                         eval1 state (If a (Seq [b, (While a b)]) Skip) steps
                       else
-                         steps
+                         steps'
+        While a b  -> eval1 state (If a (Seq [b, (While a b)]) Skip) steps
         Seq a      -> eval_seq_small state (head a) (head (tail a)) steps
         Skip       -> steps
 
