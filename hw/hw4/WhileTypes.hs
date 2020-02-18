@@ -5,6 +5,7 @@ ref: https://wiki.haskell.org/Parsing_a_simple_imperative_language?fbclid=IwAR2c
 ----------------------
 -}
 module WhileTypes where
+import Data.List
 import qualified Data.Map as M
 
 -- data AST = M
@@ -42,6 +43,19 @@ formatter result k a = case result of
         "{"       -> result ++ k ++ " → " ++ (show a)
         otherwise -> result ++ ", " ++ k ++ " → " ++ (show a)
 
+-- printList1 x:[] = mapM_ (\(xs) -> case xs of
+--                                        x:xs -> putStr a >> putStr (" → " ++ show b) >> putStr ""
+--                                        []   -> putStr ) []
+-- printList1 xs   = mapM_ (\(a,b) -> putStr a >> putStr (" → " ++ show b) >> putStr ",") xs
+-- -- (printList $ sort $ M.toList m)
+
+printList :: [(String, Integer)] -> String
+printList l =
+    case l of
+        x:[]   -> (fst x) ++ " → " ++ (show $ snd x)
+        x:y:xs -> (fst x) ++ " → " ++ (show $ snd x) ++ ", "
+        []     -> ""
+
 printMap :: State -> String
 printMap m = (M.foldlWithKey formatter "{" m) ++ "}"
 
@@ -58,7 +72,7 @@ printSteps steps =
 instance Show AExpr where
   show (IntConst n) = show n
   show (Var s) = s
-  show (Neg a) = "(" ++ show a ++ ")"
+  show (Neg a) = "-" ++ show a
   show (ABinary Add a b) = "(" ++ show a ++ "+" ++ show b ++ ")"
   show (ABinary Subtract a b) = "(" ++ show a ++ "-" ++ show b ++ ")"
   show (ABinary Multiply a b) = "(" ++ show a ++ "*" ++ show b ++ ")"

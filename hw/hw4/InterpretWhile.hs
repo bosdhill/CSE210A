@@ -89,18 +89,28 @@ eval_if_small state bexpr s1 s2
 
 eval_seq_small :: State -> Stmt -> Stmt -> Steps -> Steps
 eval_seq_small state c1 c2 steps =
-    do case c1 of
-        Skip      -> eval1 state c2 steps
+    case c1 of
+        Skip      -> do let steps' = steps ++ [(c2, state)]
+                        eval1 state c2 steps'
         otherwise -> do let steps' = eval1 state c1 steps
                         let (stmt', state') = last steps'
-                        eval1 state' (Seq [stmt', c2]) steps'
+                        let steps'' = steps ++ [(Seq [stmt', c2], state')]
+                        eval_seq_small state' stmt' c2 steps''
+
+-- convert_seq :: Stmt -> Stmt
+-- convert_seq s =
+--     case s of
+--         Seq l     -> case l of
+--                         x:y:[]        -> Seq [convert_seq x, convert_seq y]
+--                         x:[]          -> x
+--                         otherwise     -> Skip
+--         otherwise -> s
 
 eval1 :: State -> Stmt -> Steps -> Steps
 eval1 state stmt steps =
     case stmt of
         Assign a b -> do let (stmt', state') = eval_assign_small state a b
-                         let steps' = steps ++ [(stmt', state')]
-                         eval1 state' stmt' steps'
+                         steps ++ [(stmt', state')]
         If a b c   -> do let (stmt', state') = eval_if_small state a b c
                          let steps' = steps ++ [(stmt', state')]
                          eval1 state' stmt' steps'
@@ -117,3 +127,44 @@ test_if :: IO()
 test_if =
     do let steps = eval1 (M.fromList []) (parseString "if x=0 ∧ y < 4 then x:= 1 else x:= 3") ([])
        putStrLn (printSteps steps)
+
+-- test
+-- while x=0 do x := 3'
+
+-- his
+-- ⇒ x := 3; while (x=0) do { x := 3 }, {}
+-- ⇒ skip; while (x=0) do { x := 3 }, {x → 3}
+-- ⇒ while (x=0) do { x := 3 }, {x → 3}
+-- ⇒ skip, {x → 3}'
+
+-- mine
+-- ⇒ x := 3; while (x=0) do { x := 3 }, {}
+-- ⇒ skip, {x → 3}
+-- ⇒ skip, {x → 3}
+test_while :: IO()
+test_while =
+    do let steps = eval1 (M.fromList []) (parseString "while x=0 do x := 3") ([])
+       putStrLn (printSteps steps)
+
+test_seq :: IO()
+test_seq =
+    do let steps = eval1 (M.fromList []) (parseString "z:=1;x := 3;y:=4") ([])
+       putStrLn (printSteps steps)
+
+
+-- 'while ¬(x  < 0) do x := -1
+-- '⇒ x := -1; while ¬(x<0) do { x := -1 }, {}
+-- ⇒ skip; while ¬(x<0) do { x := -1 }, {x → -1}
+-- ⇒ while ¬(x<0) do { x := -1 }, {x → -1}
+-- ⇒ skip, {x → -1}'
+
+test_while_not_f :: IO()
+test_while_not_f =
+    do let steps = eval1 (M.fromList []) (parseString "while ¬(x  < 0) do x := -1") ([])
+       putStrLn (printSteps steps)
+       
+-- test_convert_seq :: IO()
+-- test_convert_seq =
+--     do let stmt = parseString "x:=1;x:=4;x:=5"
+--        putStrLn $ show stmt
+--        putStrLn (show (convert_seq stmt))
