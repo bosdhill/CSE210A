@@ -75,4 +75,22 @@ eval state s =
         While a b  -> eval_while state a b
         Skip       -> state
 
--- eval1 :: Stmt -> State -> Steps -> (Stmt, M.Map), Steps
+--- also need access to the next state
+eval_assign_small :: State -> String -> AExpr -> Step
+eval_assign_small state k v =
+    do let v' = (eval_aexpr state v)
+       let state' = M.insert k v' state
+       ((Assign k (IntConst v')), state')
+
+
+eval1 :: State -> Stmt -> Steps -> Steps
+eval1 state st steps =
+    case st of
+        Assign a b -> do let (stmt, state') = eval_assign_small state a b
+                         steps ++ [(stmt, state')]
+        _          -> steps
+
+test_eval1 :: IO()
+test_eval1 =
+    do let steps = eval1 (M.fromList []) (Assign "x" (IntConst 3)) ([(Skip, M.empty)])
+       putStrLn (printSteps steps)

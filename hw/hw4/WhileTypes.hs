@@ -9,6 +9,7 @@ import qualified Data.Map as M
 
 -- data AST = M
 type State = M.Map String Integer
+type Step = (Stmt, State)
 type Steps = [(Stmt, State)]
 
 data BExpr = BoolConst Bool
@@ -37,15 +38,22 @@ data Stmt = Seq [Stmt]
            | While BExpr Stmt
            | Skip
 
--- -- Need to convert to lexographic order by key
--- printMap function?
--- Need [(Stmt, M)]
--- formatter result k a = case result of
---         "{"       -> result ++ k ++ " → " ++ (show a)
---         otherwise -> result ++ ", " ++ k ++ " → " ++ (show a)
+formatter result k a = case result of
+        "{"       -> result ++ k ++ " → " ++ (show a)
+        otherwise -> result ++ ", " ++ k ++ " → " ++ (show a)
 
--- instance Show AST where
---     show AST m = (M.foldlWithKey formatter "{" m) ++ "}"
+printMap :: State -> String
+printMap m = (M.foldlWithKey formatter "{" m) ++ "}"
+
+printSteps :: Steps -> String
+printSteps steps =
+    case steps of
+        (s, m):xs  -> if m == M.empty
+                      then
+                        "⇒ " ++ show s ++ ", {}\n" ++ (printSteps xs)
+                      else
+                        "⇒ " ++ show s ++ ", " ++ (printMap m) ++ "\n" ++ (printSteps xs)
+        []         -> ""
 
 instance Show AExpr where
   show (IntConst n) = show n
