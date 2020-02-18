@@ -52,30 +52,9 @@ eval_bexpr state a =
         BBinary a b c -> eval_bbinary state a b c
         RBinary a b c -> eval_rbinary state a b c
 
-eval_while :: State -> BExpr -> Stmt -> State
-eval_while state a b
-    | eval_bexpr state a = eval (eval state b) (While a b)
-    | otherwise          = state
-
 eval_assign :: State -> String -> AExpr -> State
 eval_assign state k v = M.insert k (eval_aexpr state v) state
 
-eval_if :: State -> BExpr -> Stmt -> Stmt -> State
-eval_if state bexpr s1 s2
-    | eval_bexpr state bexpr = eval state s1
-    | otherwise              = eval state s2
-
-eval :: State -> Stmt -> State
-eval state s =
-    case s of
-        Seq []     -> state
-        Seq x      -> eval (eval state $ head x) $ Seq $ tail x
-        Assign a b -> eval_assign state a b
-        If a b c   -> eval_if state a b c
-        While a b  -> eval_while state a b
-        Skip       -> state
-
---- also need access to the next state
 eval_assign_small :: State -> String -> AExpr -> Step
 eval_assign_small state k v =
     do let v' = (eval_aexpr state v)
@@ -102,13 +81,12 @@ eval1 state stmt steps =
     case stmt of
         Assign a b -> do let (stmt', state') = eval_assign_small state a b
                          steps ++ [(stmt', state')]
-        If a b c   -> do 
-                      let (stmt', state') = eval_if_small state a b c
-                      let steps' = steps ++ [(stmt', state')]
-                      if length steps < 9999 then
-                         eval1 state' stmt' steps'
-                      else
-                         steps'
+        If a b c   -> do let (stmt', state') = eval_if_small state a b c
+                         let steps' = steps ++ [(stmt', state')]
+                         if length steps < 9999 then
+                            eval1 state' stmt' steps'
+                         else
+                            steps'
         While a b  -> eval1 state (If a (Seq [b, (While a b)]) Skip) steps
         Seq a      -> eval_seq_small state (head a) (head (tail a)) steps
         Skip       -> steps
@@ -123,55 +101,17 @@ test_if =
     do let steps = eval1 (M.fromList []) (parseString "if x=0 ∧ y < 4 then x:= 1 else x:= 3") ([])
        putStrLn (printSteps steps)
 
--- test
--- while x=0 do x := 3'
-
--- his
--- ⇒ x := 3; while (x=0) do { x := 3 }, {}
--- ⇒ skip; while (x=0) do { x := 3 }, {x → 3}
--- ⇒ while (x=0) do { x := 3 }, {x → 3}
--- ⇒ skip, {x → 3}'
-
--- mine
--- ⇒ x := 3; while (x=0) do { x := 3 }, {}
--- ⇒ skip, {x → 3}
--- ⇒ skip, {x → 3}
 test_while :: IO()
 test_while =
     do let steps = eval1 (M.fromList []) (parseString "while x=0 do x := 3") ([])
        putStrLn (printSteps steps)
 
--- '{ a:= 1; b:=2 }; c:=3'
--- his 
--- '⇒ skip; b := 2; c := 3, {a → 1}
--- ⇒ b := 2; c := 3, {a → 1}
--- ⇒ skip; c := 3, {a → 1, b → 2}
--- ⇒ c := 3, {a → 1, b → 2}
--- ⇒ skip, {a → 1, b → 2, c → 3}'
-
--- mine
--- ⇒ skip; b := 2, {a → 1}
--- ⇒ b := 2, {a → 1}
--- ⇒ skip, {a → 1, b → 2}
 test_seq :: IO()
 test_seq =
     do let steps = eval1 (M.fromList []) (parseString "{ a:= 1; b:=2 }; c:=3") ([])
        putStrLn (printSteps steps)
 
-
--- 'while ¬(x  < 0) do x := -1
--- '⇒ x := -1; while ¬(x<0) do { x := -1 }, {}
--- ⇒ skip; while ¬(x<0) do { x := -1 }, {x → -1}
--- ⇒ while ¬(x<0) do { x := -1 }, {x → -1}
--- ⇒ skip, {x → -1}'
-
 test_while_not_f :: IO()
 test_while_not_f =
     do let steps = eval1 (M.fromList []) (parseString "while ¬(x  < 0) do x := -1") ([])
        putStrLn (printSteps steps)
-
--- test_convert_seq :: IO()
--- test_convert_seq =
---     do let stmt = parseString "x:=1;x:=4;x:=5"
---        putStrLn $ show stmt
---        putStrLn (show (convert_seq stmt))
