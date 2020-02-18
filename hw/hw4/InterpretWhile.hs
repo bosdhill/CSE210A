@@ -87,6 +87,13 @@ eval_if_small state bexpr s1 s2
     | eval_bexpr state bexpr = (s1, state)
     | otherwise              = (s2, state)
 
+eval_seq_small :: State -> Stmt -> Stmt -> Steps -> Steps
+eval_seq_small state c1 c2 steps =
+    do case c1 of
+        Skip      -> eval1 state c2 steps
+        otherwise -> do let steps' = eval1 state c1 steps
+                        let (stmt', state') = last steps'
+                        eval1 state' (Seq [stmt', c2]) steps'
 
 eval1 :: State -> Stmt -> Steps -> Steps
 eval1 state stmt steps =
@@ -97,7 +104,9 @@ eval1 state stmt steps =
         If a b c   -> do let (stmt', state') = eval_if_small state a b c
                          let steps' = steps ++ [(stmt', state')]
                          eval1 state' stmt' steps'
-        _          -> steps
+        While a b  -> eval1 state (If a (Seq [b, (While a b)]) Skip) steps
+        Seq a      -> eval_seq_small state (head a) (head (tail a)) steps
+        Skip       -> steps
 
 test_assign :: IO()
 test_assign =
