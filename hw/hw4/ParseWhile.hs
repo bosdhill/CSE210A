@@ -30,6 +30,7 @@ languageDef =
                                       , "∧"
                                       , "∨"
                                       , "="
+                                      , ";"
                                       ]
             , Token.reservedOpNames = ["+", "-", "*", "/", ":=", "="
                                       , "<", ">", "∧", "∨", "¬", "^"
@@ -64,6 +65,13 @@ statement' =   ifStmt
             <|> skipStmt
             <|> assignStmt
 
+seqStmt :: Parser Stmt
+seqStmt =
+   do stmt1 <- statement
+      semi
+      stmt2 <- statement
+      return $ Seq [stmt1, stmt2]
+
 ifStmt :: Parser Stmt
 ifStmt =
    do reserved "if"
@@ -79,7 +87,8 @@ whileStmt =
    do reserved "while"
       cond <- bExpression
       reserved "do"
-      stmt <- statement
+      stmt <-     braces statement'
+              <|> statement'
       return $ While cond stmt
 
 assignStmt :: Parser Stmt

@@ -97,15 +97,6 @@ eval_seq_small state c1 c2 steps =
                         let steps'' = steps ++ [(Seq [stmt', c2], state')]
                         eval_seq_small state' stmt' c2 steps''
 
--- convert_seq :: Stmt -> Stmt
--- convert_seq s =
---     case s of
---         Seq l     -> case l of
---                         x:y:[]        -> Seq [convert_seq x, convert_seq y]
---                         x:[]          -> x
---                         otherwise     -> Skip
---         otherwise -> s
-
 eval1 :: State -> Stmt -> Steps -> Steps
 eval1 state stmt steps =
     case stmt of
@@ -114,7 +105,10 @@ eval1 state stmt steps =
         If a b c   -> do let (stmt', state') = eval_if_small state a b c
                          let steps' = steps ++ [(stmt', state')]
                          eval1 state' stmt' steps'
-        While a b  -> eval1 state (If a (Seq [b, (While a b)]) Skip) steps
+        While a b  -> if length steps < 10000 then 
+                         eval1 state (If a (Seq [b, (While a b)]) Skip) steps
+                      else
+                         steps
         Seq a      -> eval_seq_small state (head a) (head (tail a)) steps
         Skip       -> steps
 
@@ -146,9 +140,21 @@ test_while =
     do let steps = eval1 (M.fromList []) (parseString "while x=0 do x := 3") ([])
        putStrLn (printSteps steps)
 
+-- '{ a:= 1; b:=2 }; c:=3'
+-- his 
+-- '⇒ skip; b := 2; c := 3, {a → 1}
+-- ⇒ b := 2; c := 3, {a → 1}
+-- ⇒ skip; c := 3, {a → 1, b → 2}
+-- ⇒ c := 3, {a → 1, b → 2}
+-- ⇒ skip, {a → 1, b → 2, c → 3}'
+
+-- mine
+-- ⇒ skip; b := 2, {a → 1}
+-- ⇒ b := 2, {a → 1}
+-- ⇒ skip, {a → 1, b → 2}
 test_seq :: IO()
 test_seq =
-    do let steps = eval1 (M.fromList []) (parseString "z:=1;x := 3;y:=4") ([])
+    do let steps = eval1 (M.fromList []) (parseString "{ a:= 1; b:=2 }; c:=3") ([])
        putStrLn (printSteps steps)
 
 
@@ -162,7 +168,7 @@ test_while_not_f :: IO()
 test_while_not_f =
     do let steps = eval1 (M.fromList []) (parseString "while ¬(x  < 0) do x := -1") ([])
        putStrLn (printSteps steps)
-       
+
 -- test_convert_seq :: IO()
 -- test_convert_seq =
 --     do let stmt = parseString "x:=1;x:=4;x:=5"
