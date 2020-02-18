@@ -110,10 +110,10 @@ eval1 state stmt steps =
 
 test_assign :: IO()
 test_assign =
-    do let steps = eval1 (M.fromList []) (Assign "x" (IntConst 3)) ([(Skip, M.empty)])
+    do let steps = eval1 (M.fromList []) (Assign "x" (IntConst 3)) ([])
        putStrLn (printSteps steps)
 
 test_if :: IO()
 test_if =
-    do let steps = eval1 (M.fromList []) (parseString "if x=0 ∧ y < 4 then x:= 1 else x:= 3") ([(Skip, M.empty)])
+    do let steps = eval1 (M.fromList []) (parseString "if x=0 ∧ y < 4 then x:= 1 else x:= 3") ([])
        putStrLn (printSteps steps)
