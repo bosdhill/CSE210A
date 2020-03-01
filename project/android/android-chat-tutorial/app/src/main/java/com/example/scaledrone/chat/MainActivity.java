@@ -33,7 +33,6 @@ public class MainActivity extends AppCompatActivity implements RoomListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         editText = (EditText) findViewById(R.id.editText);
 
         messageAdapter = new MessageAdapter(this);
@@ -42,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements RoomListener {
 
         MemberData data = new MemberData(getRandomName(), getRandomColor());
 
+        communicator = new Communicator(getApplicationContext());
         scaledrone = new Scaledrone(channelID, data);
         scaledrone.connect(new Listener() {
             @Override

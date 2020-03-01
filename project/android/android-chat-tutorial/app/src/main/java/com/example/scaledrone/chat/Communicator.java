@@ -1,6 +1,7 @@
 package com.example.scaledrone.chat;
 
 import android.app.Application;
+import android.content.Context;
 import android.util.Log;
 
 import com.hypelabs.hype.Error;
@@ -12,19 +13,19 @@ import com.hypelabs.hype.MessageObserver;
 import com.hypelabs.hype.NetworkObserver;
 import com.hypelabs.hype.StateObserver;
 
-public class Communicator extends Application implements StateObserver, NetworkObserver, MessageObserver {
+public class Communicator implements StateObserver, NetworkObserver, MessageObserver {
     private static final String TAG = Communicator.class.getName();
 
-    public Communicator() {
-        requestHypeToStart();
+    public Communicator(Context context) {
+        requestHypeToStart(context);
     }
 
-    protected void requestHypeToStart() {
-
+    protected void requestHypeToStart(Context context) {
+        Log.i(TAG, String.format("requestHypeToStart"));
         // The application context is used to query the user for permissions, such as using
         // the Bluetooth adapter or enabling Wi-Fi. The context must be set before anything
         // else is attempted, otherwise resulting in an exception being thrown.
-        Hype.setContext(getApplicationContext());
+        Hype.setContext(context);
 
         // Adding itself as an Hype state observer makes sure that the application gets
         // notifications for lifecycle events being triggered by the Hype SDK. These
@@ -120,7 +121,7 @@ public class Communicator extends Application implements StateObserver, NetworkO
     }
 
     @Override
-    public String onHypeRequestAccessToken(int i) {
-        return null;
+    public String onHypeRequestAccessToken(int userIdentifier) {
+        return "3905669394fa2533";
     }
 }
