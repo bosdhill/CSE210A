@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity implements RoomListener {
     private String roomName = "observable-room";
     private EditText editText;
     private Scaledrone scaledrone;
+    private Communicator communicator;
     private MessageAdapter messageAdapter;
     private ListView messagesView;
 
