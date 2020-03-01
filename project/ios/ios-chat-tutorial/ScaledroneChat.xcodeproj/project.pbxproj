@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		3BD6B23DDC53C21E88612791 /* Pods_ScaledroneChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 082CBBE5F5A8D8EF116B16E4 /* Pods_ScaledroneChat.framework */; };
+		DF26222B240B590300174058 /* Hype.framework in Embed Libraries */ = {isa = PBXBuildFile; fileRef = DF262229240B590300174058 /* Hype.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		DF26222D240B9CD100174058 /* Communicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF26222C240B9CD100174058 /* Communicator.swift */; };
+		DF949E03240B5549009B2055 /* Hype.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DF949E02240B5549009B2055 /* Hype.framework */; };
 		F51FC96A2143A823001F9009 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51FC9692143A823001F9009 /* AppDelegate.swift */; };
 		F51FC96C2143A823001F9009 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51FC96B2143A823001F9009 /* ViewController.swift */; };
 		F51FC96F2143A823001F9009 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F51FC96D2143A823001F9009 /* Main.storyboard */; };
@@ -18,12 +21,30 @@
 		F51FC9802143AD46001F9009 /* ChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51FC97F2143AD46001F9009 /* ChatService.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		DF949E01240B51C0009B2055 /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				DF26222B240B590300174058 /* Hype.framework in Embed Libraries */,
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		082CBBE5F5A8D8EF116B16E4 /* Pods_ScaledroneChat.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ScaledroneChat.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1AC9838E5C4B2D4A33AE4847 /* Pods-ScaledroneChat.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ScaledroneChat.release.xcconfig"; path = "Pods/Target Support Files/Pods-ScaledroneChat/Pods-ScaledroneChat.release.xcconfig"; sourceTree = "<group>"; };
 		3A765884C06B9D44D62F85BE /* Pods-ScaledroneChat.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ScaledroneChat.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ScaledroneChat/Pods-ScaledroneChat.debug.xcconfig"; sourceTree = "<group>"; };
 		6F129B3DA0100A4D961A4F53 /* Pods_ScaledroneChatTest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ScaledroneChatTest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9EDD2FBD26B14939767C3E1A /* Pods-ScaledroneChatTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ScaledroneChatTest.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ScaledroneChatTest/Pods-ScaledroneChatTest.debug.xcconfig"; sourceTree = "<group>"; };
+		DF262229240B590300174058 /* Hype.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Hype.framework; path = Hype/Hype.framework; sourceTree = "<group>"; };
+		DF26222C240B9CD100174058 /* Communicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Communicator.swift; sourceTree = "<group>"; };
+		DF949DFF240B51C0009B2055 /* Hype */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Hype; path = ../../../../../hype/HypeiOS/Hype.framework/Hype; sourceTree = "<group>"; };
+		DF949E02240B5549009B2055 /* Hype.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Hype.framework; path = ../../../../../hype/HypeiOS/Hype.framework; sourceTree = "<group>"; };
 		E0DC8D108C38EC38D898977F /* Pods-ScaledroneChatTest.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ScaledroneChatTest.release.xcconfig"; path = "Pods/Target Support Files/Pods-ScaledroneChatTest/Pods-ScaledroneChatTest.release.xcconfig"; sourceTree = "<group>"; };
 		F51FC9662143A823001F9009 /* ScaledroneChat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScaledroneChat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F51FC9692143A823001F9009 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -42,6 +63,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DF949E03240B5549009B2055 /* Hype.framework in Frameworks */,
 				3BD6B23DDC53C21E88612791 /* Pods_ScaledroneChat.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -63,6 +85,7 @@
 		A6D63C0695B38B159CBC17AF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				DF949E02240B5549009B2055 /* Hype.framework */,
 				6F129B3DA0100A4D961A4F53 /* Pods_ScaledroneChatTest.framework */,
 				082CBBE5F5A8D8EF116B16E4 /* Pods_ScaledroneChat.framework */,
 			);
@@ -72,6 +95,8 @@
 		F51FC95D2143A823001F9009 = {
 			isa = PBXGroup;
 			children = (
+				DF262229240B590300174058 /* Hype.framework */,
+				DF949DFF240B51C0009B2055 /* Hype */,
 				F51FC9682143A823001F9009 /* ScaledroneChat */,
 				F51FC9672143A823001F9009 /* Products */,
 				9981FBA92B24414C9D45DFAE /* Pods */,
@@ -99,6 +124,7 @@
 				F51FC97B2143A8E5001F9009 /* Message.swift */,
 				F51FC97D2143AC63001F9009 /* Extensions.swift */,
 				F51FC97F2143AD46001F9009 /* ChatService.swift */,
+				DF26222C240B9CD100174058 /* Communicator.swift */,
 			);
 			path = ScaledroneChat;
 			sourceTree = "<group>";
@@ -115,6 +141,7 @@
 				F51FC9632143A823001F9009 /* Frameworks */,
 				F51FC9642143A823001F9009 /* Resources */,
 				58451AA0ECB57FBACB80FBED /* [CP] Embed Pods Frameworks */,
+				DF949E01240B51C0009B2055 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -219,6 +246,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DF26222D240B9CD100174058 /* Communicator.swift in Sources */,
 				F51FC97C2143A8E5001F9009 /* Message.swift in Sources */,
 				F51FC96C2143A823001F9009 /* ViewController.swift in Sources */,
 				F51FC96A2143A823001F9009 /* AppDelegate.swift in Sources */,
@@ -371,13 +399,18 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 9CK4TUWTU5;
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Hype",
+				);
 				INFOPLIST_FILE = "$(SRCROOT)/ScaledroneChat/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.scaledrone.ScaledroneChatTest;
+				PRODUCT_BUNDLE_IDENTIFIER = com.scaledrone.ScaledroneChatTest11111;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -390,13 +423,18 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 9CK4TUWTU5;
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Hype",
+				);
 				INFOPLIST_FILE = "$(SRCROOT)/ScaledroneChat/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.scaledrone.ScaledroneChatTest;
+				PRODUCT_BUNDLE_IDENTIFIER = com.scaledrone.ScaledroneChatTest11111;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";

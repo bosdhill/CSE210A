@@ -14,6 +14,7 @@ class ViewController: MessagesViewController {
   var chatService: ChatService!
   var messages: [Message] = []
   var member: Member!
+  var communicator: Communicator!
   
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -22,6 +23,8 @@ class ViewController: MessagesViewController {
     messagesCollectionView.messagesLayoutDelegate = self
     messageInputBar.delegate = self
     messagesCollectionView.messagesDisplayDelegate = self
+    communicator = Communicator()
+    communicator.requestHypeToStart()
     
     chatService = ChatService(member: member, onRecievedMessage: {
       [weak self] message in
