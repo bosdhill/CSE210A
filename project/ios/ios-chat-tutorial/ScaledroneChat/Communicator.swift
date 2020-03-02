@@ -40,6 +40,8 @@ class Communicator: NSObject, HYPStateObserver, HYPNetworkObserver, HYPMessageOb
     
     func hypeDidFailStartingWithError(_ error: HYPError!) {
         NSLog("Hype failed starting [%@]", error.description)
+        NSLog("Hype code [%d]", error.code.rawValue)
+        NSLog("Hype suggestion [%@]", error.suggestion)
         
         // return alert
 //        let errorMessage : String = "Description: " + (error.description as String) + "\nReason:" + (error.reason as String)  + "\nSuggestion:" + (error.suggestion as String)

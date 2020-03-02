@@ -17,6 +17,7 @@ public class Communicator implements StateObserver, NetworkObserver, MessageObse
     private static final String TAG = Communicator.class.getName();
 
     public Communicator(Context context) {
+//        this.context = context;
         requestHypeToStart(context);
     }
 

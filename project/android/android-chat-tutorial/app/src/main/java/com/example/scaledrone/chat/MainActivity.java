@@ -18,7 +18,7 @@ import com.scaledrone.lib.Scaledrone;
 import java.sql.SQLOutput;
 import java.util.Random;
 
-public class MainActivity extends AppCompatActivity implements RoomListener {
+public class MainActivity extends AppCompatActivity implements RoomListener  {
 
     // replace this with a real channelID from Scaledrone dashboard
     private String channelID = "CHANNEL_ID_FROM_YOUR_SCALEDRONE_DASHBOARD";
