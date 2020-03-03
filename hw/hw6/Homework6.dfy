@@ -48,7 +48,7 @@ ensures append(append(xs, ys), zs) == append(xs, append(ys, zs))
 }
 
 lemma sameElements<T>(tree:Tree<T>, element:T)
-ensures treeContains(tree, element) == listContains(flatten(tree), element)
+ensures treeContains(tree, element) <==> listContains(flatten(tree), element)
 {
     match(tree)
         case Leaf => { }
@@ -57,7 +57,7 @@ ensures treeContains(tree, element) == listContains(flatten(tree), element)
                 treeContains(tree, element)
                 == (T == element || treeContains(T1, element) || treeContains(T2, element))
                 == (T == element || listContains(flatten(T1), element) || listContains(flatten(T2), element))
-                == (T == element || listContains(append(flatten(T1), flatten(T2)), element))
+                // == (T == element || listContains(append(flatten(T1), flatten(T2)), element))
                 // == listContains(flatten(tree), element)
             );
         }
