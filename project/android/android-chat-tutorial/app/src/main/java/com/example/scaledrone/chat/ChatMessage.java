@@ -1,11 +1,11 @@
 package com.example.scaledrone.chat;
 
-public class Message {
+public class ChatMessage {
     private String text;
     private MemberData memberData;
     private boolean belongsToCurrentUser;
 
-    public Message(String text, MemberData data, boolean belongsToCurrentUser) {
+    public ChatMessage(String text, MemberData data, boolean belongsToCurrentUser) {
         this.text = text;
         this.memberData = data;
         this.belongsToCurrentUser = belongsToCurrentUser;

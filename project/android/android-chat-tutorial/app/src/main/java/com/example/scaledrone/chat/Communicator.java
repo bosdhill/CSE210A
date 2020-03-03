@@ -75,19 +75,38 @@ public class Communicator implements StateObserver, NetworkObserver, MessageObse
 
     }
 
+    boolean shouldResolveInstance(Instance instance) {
+        // This method should decide whether an instance is interesting for communicating.
+        // For that purpose, the implementation could use instance.userIdentifier, but it's
+        // noticeable that announcements may not be available yet. Announcements are only
+        // exchanged during the handshake.
+        return true;
+    }
+
     @Override
     public void onHypeInstanceFound(Instance instance) {
-
+        Log.i(TAG, "found instance: " + instance.getAppStringIdentifier());
+        // Instances need to be resolved before being ready for communicating. This will
+        // force the two of them to perform an handshake.
+        if (shouldResolveInstance(instance)) {
+            Hype.resolve(instance);
+        }
     }
 
     @Override
     public void onHypeInstanceLost(Instance instance, Error error) {
+        Log.i(TAG, String.format("Hype lost instance: %s [%s]", instance.getStringIdentifier(), error.toString()));
 
+        // This instance is no longer available for communicating. If the instance
+        // is somehow being tracked, such as by a map of instances, this would be
+        // the proper time for cleanup.
     }
 
     @Override
     public void onHypeInstanceResolved(Instance instance) {
-
+        Log.i(TAG, String.format("Hype resolved instance: %s", instance.getStringIdentifier()));
+        // At this point the instance is ready to communicate. Sending and receiving
+        // content is possible at any time now.
     }
 
     @Override

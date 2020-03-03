@@ -14,17 +14,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MessageAdapter extends BaseAdapter {
+public class ChatMessageAdapter extends BaseAdapter {
 
-    List<Message> messages = new ArrayList<Message>();
+    List<ChatMessage> messages = new ArrayList<ChatMessage>();
     Context context;
 
-    public MessageAdapter(Context context) {
+    public ChatMessageAdapter(Context context) {
         this.context = context;
     }
 
 
-    public void add(Message message) {
+    public void add(ChatMessage message) {
         this.messages.add(message);
         notifyDataSetChanged();
     }
@@ -48,7 +48,7 @@ public class MessageAdapter extends BaseAdapter {
     public View getView(int i, View convertView, ViewGroup viewGroup) {
         MessageViewHolder holder = new MessageViewHolder();
         LayoutInflater messageInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-        Message message = messages.get(i);
+        ChatMessage message = messages.get(i);
 
         if (message.isBelongsToCurrentUser()) {
             convertView = messageInflater.inflate(R.layout.my_message, null);
