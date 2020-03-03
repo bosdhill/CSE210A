@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
     private Communicator communicator;
     private ChatMessageAdapter messageAdapter;
     private ListView messagesView;
-    private Instance receiver;
+    private Instance resolvedInstance;
     private boolean attached;
     private boolean resolveDialogIsOpen = false;
     private AlertDialog dialog;
@@ -121,22 +121,44 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
 
     @Override
     public void onHypeMessageReceived(Message message, Instance instance) {
+        Log.i(TAG, String.format("Hype message received %s %s", message.getIdentifier(), instance.getStringIdentifier()));
+    }
 
+    public void showSentFailedDialog(Instance instance) {
+        final AlertDialog.Builder confirm = new AlertDialog.Builder(MainActivity.this)
+                .setTitle("Sending Failed")
+                .setMessage(String.format("Could not send to %s", instance.getStringIdentifier()))
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.i(TAG, "Hype sent failed dialog clicked");
+//                        setResolveDialogIsOpen(false);
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert);
+        final AlertDialog dialog = confirm.create();
+        dialog.show();
     }
 
     @Override
     public void onHypeMessageFailedSending(MessageInfo messageInfo, Instance instance, Error error) {
-
+        Log.i(TAG, String.format("Hype message failed sending %s %s [%s]", messageInfo.getIdentifier(), instance.getStringIdentifier(),  error.toString()));
+        final Instance inst = instance;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                showSentFailedDialog(inst);
+            }
+        });
     }
 
     @Override
     public void onHypeMessageSent(MessageInfo messageInfo, Instance instance, float v, boolean b) {
-
+        Log.i(TAG, String.format("Hype message sent %s %s [%f] %b", messageInfo.getIdentifier(), instance.getStringIdentifier(), v, b));
     }
 
     @Override
     public void onHypeMessageDelivered(MessageInfo messageInfo, Instance instance, float v, boolean b) {
-
+        Log.i(TAG, String.format("Hype message delivered %s %s [%f] %b", messageInfo.getIdentifier(), instance.getStringIdentifier(), v, b));
     }
 
     boolean shouldResolveInstance(Instance instance) {
@@ -193,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
         Log.i(TAG, String.format("Hype resolved instance: %s", instance.getStringIdentifier()));
         // At this point the instance is ready to communicate. Sending and receiving
         // content is possible at any time now.
-        this.receiver = instance;
+        this.resolvedInstance = instance;
         if (!isResolveDialogOpen()) {
             runOnUiThread(new Runnable() {
                 @Override
@@ -244,27 +266,6 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
         Log.i(TAG, String.format("Hype is ready"));
     }
 
-    private void showAttachDialog() {
-        final AlertDialog.Builder confirm = new AlertDialog.Builder(MainActivity.this)
-                .setTitle("Not attached")
-                .setMessage("You are currently unattached. Would you like to attach?")
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        Log.d(TAG, "dialog pressed");
-                        requestHypeToStart();
-                    }
-                })
-                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                    }
-                })
-                .setIcon(android.R.drawable.ic_dialog_alert);
-        final AlertDialog dialog = confirm.create();
-        dialog.show();
-    }
-
     @Override
     public void onHypeStateChange() {
         switch(Hype.getState()) {
@@ -310,7 +311,12 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
         System.out.println("sendMessage");
         String message = editText.getText().toString();
         if (message.length() > 0) {
-//            scaledrone.publish(roomName, message);
+            Message sentMessage;
+            try {
+             sentMessage = sendMessage(message, resolvedInstance, true);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             final MemberData mData = new MemberData("Bobby", "");
             final ChatMessage m = new ChatMessage(message, mData, true);
             runOnUiThread(new Runnable() {
