@@ -1,7 +1,7 @@
 package com.example.scaledrone.chat;
 
-import android.content.Context;
-import android.support.annotation.Nullable;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -40,6 +40,9 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
     private ChatMessageAdapter messageAdapter;
     private ListView messagesView;
     private Instance receiver;
+    private boolean attached;
+    private boolean resolveDialogIsOpen = false;
+    private AlertDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +93,9 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
         // notifications for lifecycle events being triggered by the Hype SDK. These
         // events include starting and stopping, as well as some error handling.
         Hype.addStateObserver(this);
+
+        // Need to implement this to announce to other user
+        Hype.setAnnouncement("New user found".getBytes());
 
         // Network observer notifications include other devices entering and leaving the
         // network. When a device is found all observers get a onHypeInstanceFound
@@ -160,12 +166,45 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
         // the proper time for cleanup.
     }
 
+    public void showResolveDialog(Instance instance) {
+        setResolveDialogIsOpen(true);
+        final AlertDialog.Builder confirm = new AlertDialog.Builder(MainActivity.this)
+                .setTitle("New Instance Resolved")
+                .setMessage(String.format("Instance found: %s\nDo you wish to communicate?", instance.getStringIdentifier()))
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "Hype will communicate with instance");
+                        setResolveDialogIsOpen(false);
+                    }
+                })
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        setResolveDialogIsOpen(false);
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert);
+        final AlertDialog dialog = confirm.create();
+        dialog.show();
+    }
+
     @Override
-    public void onHypeInstanceResolved(Instance instance) {
+    public void onHypeInstanceResolved(final Instance instance) {
         Log.i(TAG, String.format("Hype resolved instance: %s", instance.getStringIdentifier()));
         // At this point the instance is ready to communicate. Sending and receiving
         // content is possible at any time now.
-        receiver = instance;
+        this.receiver = instance;
+        if (!isResolveDialogOpen()) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (dialog != null) {
+                        dialog.dismiss();
+                    }
+                    showResolveDialog(instance);
+                }
+            });
+        }
     }
 
     @Override
@@ -176,6 +215,17 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
     @Override
     public void onHypeStart() {
         Log.i(TAG, "Hype started");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final AlertDialog.Builder confirm = new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("Hype started...")
+                        .setMessage("Looking for instances")
+                        .setIcon(android.R.drawable.ic_dialog_alert);
+                dialog = confirm.create();
+                dialog.show();
+            }
+        });
     }
 
     @Override
@@ -191,12 +241,54 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
 
     @Override
     public void onHypeReady() {
+        Log.i(TAG, String.format("Hype is ready"));
+    }
 
+    private void showAttachDialog() {
+        final AlertDialog.Builder confirm = new AlertDialog.Builder(MainActivity.this)
+                .setTitle("Not attached")
+                .setMessage("You are currently unattached. Would you like to attach?")
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "dialog pressed");
+                        requestHypeToStart();
+                    }
+                })
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert);
+        final AlertDialog dialog = confirm.create();
+        dialog.show();
     }
 
     @Override
     public void onHypeStateChange() {
-
+        switch(Hype.getState()) {
+            case Starting:
+                Log.i(TAG, "Hype is in starting state");
+                break;
+            case Idle:
+                Log.i(TAG, "Hype is in idle state");
+                break;
+            case Running:
+//                if (!isAttached()) {
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            showAttachDialog();
+//                        }
+//                    });
+//                }
+                Log.i(TAG, "Hype is in running state");
+                break;
+            case Stopping:
+                Log.i(TAG, "Hype is in stopping state");
+                break;
+        }
     }
 
     @Override
@@ -278,6 +370,22 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
             sb.append(Integer.toHexString(r.nextInt()));
         }
         return sb.toString().substring(0, 7);
+    }
+
+    public boolean isAttached() {
+        return attached;
+    }
+
+    public void setAttached(boolean attached) {
+        this.attached = attached;
+    }
+
+    public boolean isResolveDialogOpen() {
+        return resolveDialogIsOpen;
+    }
+
+    public void setResolveDialogIsOpen(boolean resolveDialogIsOpen) {
+        this.resolveDialogIsOpen = resolveDialogIsOpen;
     }
 }
 
