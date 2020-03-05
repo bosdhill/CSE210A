@@ -52,7 +52,6 @@ class Communicator: NSObject, HYPStateObserver, HYPNetworkObserver, HYPMessageOb
     
     func hypeDidChangeState()
     {
-        
         NSLog("Hype state changed to [%d] (Idle=0, Starting=1, Running=2, Stopping=3)", HYP.state().rawValue)
     }
     
@@ -68,26 +67,31 @@ class Communicator: NSObject, HYPStateObserver, HYPNetworkObserver, HYPMessageOb
     }
     
     func hypeDidFind(_ instance: HYPInstance!) {
+        NSLog("Hype did find instance %@", instance.appStringIdentifier!)
     }
     
     func hypeDidLose(_ instance: HYPInstance!, error: HYPError!) {
+        NSLog("Hype did lost instance %@ [%s]", instance.appStringIdentifier!, error.description)
     }
     
     func hypeDidResolve(_ instance: HYPInstance!)
     {
-        NSLog("Hype resolved instance: %@", instance.stringIdentifier)
+        NSLog("Hype resolved instance: %@", instance.stringIdentifier!)
         
 //        // This device is now capable of communicating
 //        addToResolvedInstancesDict(instance)
     }
     
     func hypeDidFailResolving(_ instance: HYPInstance!, error: HYPError!) {
+        NSLog("Hype did fail resolving instance %@ [%s]", instance.appStringIdentifier!, error.description)
     }
     
     func hypeDidReceive(_ message: HYPMessage!, from fromInstance: HYPInstance!) {
+        NSLog("Hype did receive %d %@", message.info.identifier, fromInstance.appStringIdentifier!)
     }
     
     func hypeDidFailSendingMessage(_ messageInfo: HYPMessageInfo!, to toInstance: HYPInstance!, error: HYPError!) {
+        NSLog("Hype did fail sending  %d %@ %s", messageInfo.identifier, toInstance.appStringIdentifier!, error.description)
     }    
     
 }
