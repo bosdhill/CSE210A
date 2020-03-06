@@ -6,21 +6,21 @@ function flatten<T>(tree:Tree<T>):List<T>
 {
 	match(tree)
        case Leaf => Nil
-       case Node(T1, T2, T) => Cons(T, append(flatten(T1), flatten(T2)))
+       case Node(T1, T2, element) => Cons(element, append(flatten(T1), flatten(T2)))
 }
 
 function append<T>(xs:List<T>, ys:List<T>):List<T>
 {
 	match(xs)
 		case Nil => ys
-		case Cons(xsFirst, xsRest) => Cons(xsFirst, append(xsRest, ys))
+		case Cons(x, xs') => Cons(x, append(xs', ys))
 }
 
 function treeContains<T>(tree:Tree<T>, element:T):bool
 {
     match(tree)
         case Leaf => false
-        case Node(T1, T2, T) => T == element || treeContains(T1, element) || treeContains(T2, element)
+        case Node(T1, T2, element') => element' == element || treeContains(T1, element) || treeContains(T2, element)
 }
 
 function listContains<T>(xs:List<T>, element:T):bool
@@ -48,7 +48,7 @@ ensures append(append(xs, ys), zs) == append(xs, append(ys, zs))
 }
 
 ghost method listContains'<T>(xs:List<T>, ys:List<T>, element:T)
-ensures listContains(xs, element) || listContains(ys, element) <==> listContains(append(xs, ys), element)
+ensures  listContains(append(xs, ys), element) <==> listContains(xs, element) || listContains(ys, element)
 {
     match(xs) {
         case Nil => { }
@@ -56,8 +56,6 @@ ensures listContains(xs, element) || listContains(ys, element) <==> listContains
             listContains'(xs', ys, element);
             assert (
                 listContains(append(xs, ys), element)
-                // == listContains(append(Cons(x, xs'), ys), element)
-                // == listContains(Cons(x, append(xs', ys)), element)
                 == (x == element || listContains(append(xs', ys), element))
                 == (x == element || listContains(xs', element) || listContains(ys, element))
                 == listContains(xs, element) || listContains(ys, element)
@@ -72,13 +70,13 @@ ensures treeContains(tree, element) <==> listContains(flatten(tree), element)
 {
     match(tree)
         case Leaf => { }
-        case Node(T1, T2, e) => {
+        case Node(T1, T2, element') => {
             listContains'(flatten(T1), flatten(T2), element);
             assert(
                 treeContains(tree, element)
-                == (e == element || treeContains(T1, element) || treeContains(T2, element))
-                == (e == element || listContains(flatten(T1), element) || listContains(flatten(T2), element))
-                == (e == element || listContains(append(flatten(T1), flatten(T2)), element))
+                == (element' == element || treeContains(T1, element) || treeContains(T2, element))
+                == (element' == element || listContains(flatten(T1), element) || listContains(flatten(T2), element))
+                == (element' == element || listContains(append(flatten(T1), flatten(T2)), element))
                 == listContains(flatten(tree), element)
             );
         }
