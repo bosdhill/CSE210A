@@ -47,18 +47,39 @@ ensures append(append(xs, ys), zs) == append(xs, append(ys, zs))
 
 }
 
+ghost method listContains'<T>(xs:List<T>, ys:List<T>, element:T)
+ensures listContains(xs, element) || listContains(ys, element) <==> listContains(append(xs, ys), element)
+{
+    match(xs) {
+        case Nil => { }
+        case Cons(x, xs') => {
+            listContains'(xs', ys, element);
+            assert (
+                listContains(append(xs, ys), element)
+                // == listContains(append(Cons(x, xs'), ys), element)
+                // == listContains(Cons(x, append(xs', ys)), element)
+                == (x == element || listContains(append(xs', ys), element))
+                == (x == element || listContains(xs', element) || listContains(ys, element))
+                == listContains(xs, element) || listContains(ys, element)
+            );
+        }
+    }
+
+}
+
 lemma sameElements<T>(tree:Tree<T>, element:T)
 ensures treeContains(tree, element) <==> listContains(flatten(tree), element)
 {
     match(tree)
         case Leaf => { }
-        case Node(T1, T2, T) => {
+        case Node(T1, T2, e) => {
+            listContains'(flatten(T1), flatten(T2), element);
             assert(
                 treeContains(tree, element)
-                == (T == element || treeContains(T1, element) || treeContains(T2, element))
-                == (T == element || listContains(flatten(T1), element) || listContains(flatten(T2), element))
-                // == (T == element || listContains(append(flatten(T1), flatten(T2)), element))
-                // == listContains(flatten(tree), element)
+                == (e == element || treeContains(T1, element) || treeContains(T2, element))
+                == (e == element || listContains(flatten(T1), element) || listContains(flatten(T2), element))
+                == (e == element || listContains(append(flatten(T1), flatten(T2)), element))
+                == listContains(flatten(tree), element)
             );
         }
 }
