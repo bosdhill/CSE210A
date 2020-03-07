@@ -12,15 +12,77 @@ function eval(e:Exp, store:map<string, int>):int
 //fill this function in to make optimizeFeatures work
 function optimize(e:Exp):Exp
 {
-	e
+	match(e)
+		case Mult(x, y) => (
+			match(optimize(x), optimize(y))
+				case (x', y') =>
+					if (x' == Const(0) || y' == Const(0))
+					then Const(0)
+					else
+					if y' == Const(1)
+					then x'
+					else
+					if x' == Const(1)
+					then y'
+					else matchMultCase(x', y')
+			)
+ 		case Plus(x, y) => (
+			match(optimize(x), optimize(y))
+				case (x', y') =>
+					if (x' == Const(0))
+					then y'
+					else
+					if (y' == Const(0))
+					then x'
+					else matchPlusCase(x', y')
+		 )
+		case Var(x) => Var(x)
+		case Const(x) => Const(x)
+}
+
+function matchPlusCase(x':Exp, y':Exp):Exp
+{
+	match(x', y')
+		case (Const(x), Const(y)) => Const(x + y)
+		case (Const(x), Var(y)) => Plus(x', y')
+		case (Const(x), Plus(x'', y'')) => Plus(x', y')
+		case (Const(x), Mult(x'', y'')) => Plus(x', y')
+		case (Var(x''), y) => Plus(x', y')
+		case (Plus(x'', y''), y) => Plus(x', y')
+		case (Mult(x'', y''), y) => Plus(x', y')
+}
+
+function matchMultCase(x':Exp, y':Exp):Exp
+{
+	match(x', y') {
+		case (Const(x), Const(y)) => Const(x * y)
+		case (Const(x), Plus(x'', y'')) => Mult(x', y')
+		case (Const(x), Mult(x'', y''')) => Mult(x', y')
+		case (Const(x), Var(y'')) => Mult(x', y')
+		case (Var(x''), y) => Mult(x', y')
+		case (Plus(x'', y''), y) => Mult(x',y')
+		case (Mult(x'', y''), y) => Mult(x',y')
+		case (Plus(x''', y''')) => Mult(x', y')
+	}
 }
 
 //as you write optimize this will become unproved
 //you must write proof code so that Dafny can prove this
  method optimizeCorrect(e:Exp, s:map<string, int>)
 ensures eval(e,s) == eval(optimize(e), s)
+decreases e
 {
-
+	match(e)
+		case Mult(x, y) => {
+			optimizeCorrect(y, s);
+			optimizeCorrect(x, s);
+		}
+		case Plus(x, y) => {
+			optimizeCorrect(y, s);
+			optimizeCorrect(x, s);
+		}
+		case Var(x) => {}
+		case Const(x) => {}
 }
 
 method optimizeFeatures()
