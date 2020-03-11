@@ -122,6 +122,31 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
     @Override
     public void onHypeMessageReceived(Message message, Instance instance) {
         Log.i(TAG, String.format("Hype message received %s %s", message.getIdentifier(), instance.getStringIdentifier()));
+        String text = null;
+        try {
+            text = new String(message.getData(), "UTF-8");
+            // If all goes well, this will log the original text
+            Log.i(TAG, String.format("Hype received a message from: %s %s", instance.getStringIdentifier(), text));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        final ChatMessage chatMessage = new ChatMessage(text, new MemberData("other","red") , false);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                messageAdapter.add(chatMessage);
+                messagesView.setSelection(messagesView.getCount() - 1);
+            }
+        });
+    }
+
+    public void showInstanceSearchDialog() {
+        final AlertDialog.Builder confirm = new AlertDialog.Builder(MainActivity.this)
+                .setTitle("Hype started...")
+                .setMessage("Looking for instances")
+                .setIcon(android.R.drawable.ic_dialog_alert);
+        dialog = confirm.create();
+        dialog.show();
     }
 
     public void showSentFailedDialog(Instance instance) {
@@ -182,10 +207,15 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
     @Override
     public void onHypeInstanceLost(Instance instance, Error error) {
         Log.i(TAG, String.format("Hype lost instance: %s [%s]", instance.getStringIdentifier(), error.toString()));
-
         // This instance is no longer available for communicating. If the instance
         // is somehow being tracked, such as by a map of instances, this would be
         // the proper time for cleanup.
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                showInstanceSearchDialog();
+            }
+        });
     }
 
     public void showResolveDialog(Instance instance) {
@@ -240,12 +270,7 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                final AlertDialog.Builder confirm = new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("Hype started...")
-                        .setMessage("Looking for instances")
-                        .setIcon(android.R.drawable.ic_dialog_alert);
-                dialog = confirm.create();
-                dialog.show();
+                showInstanceSearchDialog();
             }
         });
     }
@@ -256,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
             Log.i(TAG, String.format("Hype stopped [%s]", error.toString()));
         }
         else {
-            Log.i(TAG, "Hype stopped [null]");
+            Log.i(TAG, "Hype stopped [null]. You should do reinstall the application.");
         }
     }
 
@@ -281,14 +306,6 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
                 Log.i(TAG, "Hype is in idle state");
                 break;
             case Running:
-//                if (!isAttached()) {
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            showAttachDialog();
-//                        }
-//                    });
-//                }
                 Log.i(TAG, "Hype is in running state");
                 break;
             case Stopping:

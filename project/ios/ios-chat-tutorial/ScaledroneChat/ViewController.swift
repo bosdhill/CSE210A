@@ -9,6 +9,7 @@
 import UIKit
 import MessageKit
 import Hype
+import Scaledrone
 
 class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserver, HYPMessageObserver  {
     
@@ -48,7 +49,6 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
     func showSearchDialog(title: String, message: String) {
         if instanceSearchController == nil {
             instanceSearchController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            instanceSearchController.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
             present(instanceSearchController, animated: true, completion: nil)
         }
     }
@@ -103,7 +103,7 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
     func hypeDidStart() {
         NSLog("Hype started!")
         DispatchQueue.main.async {
-            self.showSearchDialog(title: "Hype started", message: "Looking for instances")
+            self.showSearchDialog(title: "Hype started", message: "Searching for instances...")
         }
     }
 
@@ -140,6 +140,9 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
 
     func hypeDidLose(_ instance: HYPInstance!, error: HYPError!) {
         NSLog("Hype did lost instance %@ [%s]", instance.appStringIdentifier!, error.description)
+        DispatchQueue.main.async {
+            self.showSearchDialog(title: "Hype instance lost", message: "Searching for instances...")
+        }
     }
 
     func hypeDidResolve(_ instance: HYPInstance!)
@@ -157,12 +160,19 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
 
     func hypeDidReceive(_ message: HYPMessage!, from fromInstance: HYPInstance!) {
         NSLog("Hype did receive %d %@", message.info.identifier, fromInstance.appStringIdentifier!)
+        let msg = (NSString(data: (message?.data)!, encoding: String.Encoding.utf8.rawValue)! as String)
+        NSLog("Hype msg recieved [%@]", msg)
+//        let msg = (NSString(data: (message?.data)!, encoding: String.Encoding.utf8.rawValue)! as String
+        DispatchQueue.main.async {
+            self.messages.append(Message(member: Member(name: "other", color: UIColor(displayP3Red: 1.0, green: 1.0, blue: 0.0, alpha: 1.0)), text: msg, messageId: "32"))
+            self.messagesCollectionView.reloadData()
+            self.messagesCollectionView.scrollToBottom(animated: true)
+        }
     }
 
     func hypeDidFailSendingMessage(_ messageInfo: HYPMessageInfo!, to toInstance: HYPInstance!, error: HYPError!) {
         NSLog("Hype did fail sending  %d %@ %s", messageInfo.identifier, toInstance.appStringIdentifier!, error.description)
     }
-
 
 }
 
@@ -215,12 +225,29 @@ extension ViewController: MessagesDisplayDelegate {
 }
 
 extension ViewController: MessageInputBarDelegate {
-  func messageInputBar(
-    _ inputBar: MessageInputBar,
-    didPressSendButtonWith text: String) {
-    
-    chatService.sendMessage(text)
+  func messageInputBar(_ inputBar: MessageInputBar, didPressSendButtonWith text: String) {
+    sendMessage(text: text)
     inputBar.inputTextView.text = ""
   }
+    func sendMessage(text: String) {
+        let col = UIColor(displayP3Red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
+        let m = Member(name: "Bobby", color: col)
+        let chatMessage = Message(
+            member: m,
+            text: text,
+            messageId: UUID().uuidString)
+        
+        let data: Data? = text.data(using: String.Encoding.utf8)
+        
+        let _: HYPMessage? = HYP.send(data, to: self.resolvedInstance)
+        messageCallback(message: chatMessage)
+    }
+    func messageCallback(message: Message) {
+        DispatchQueue.main.async {
+            self.messages.append(message)
+            self.messagesCollectionView.reloadData()
+            self.messagesCollectionView.scrollToBottom(animated: true)
+        }
+    }
 }
 
