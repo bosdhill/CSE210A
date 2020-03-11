@@ -252,7 +252,12 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
 
     @Override
     public void onHypeStop(Error error) {
-        Log.i(TAG, String.format("Hype stopped [%s]", error.toString()));
+        if (error != null) {
+            Log.i(TAG, String.format("Hype stopped [%s]", error.toString()));
+        }
+        else {
+            Log.i(TAG, "Hype stopped [null]");
+        }
     }
 
     @Override

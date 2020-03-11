@@ -17,6 +17,8 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
   var member: Member!
   var communicator: Communicator!
   var resolvedInstance: HYPInstance!
+  var instanceSearchController: UIAlertController!
+  var didResolveController: UIAlertController!
   private var instanceSearchView: UIView!
   
   override func viewDidLoad() {
@@ -37,21 +39,46 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
       self?.messagesCollectionView.reloadData()
       self?.messagesCollectionView.scrollToBottom(animated: true)
     })
-    
-//    chatService.connect()
   }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-        showAlertWith(title: "Hype started", message: "Searching for instances...")
     }
     
-    func showAlertWith(title: String, message: String) {
-        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        
-        alertController.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
-        present(alertController, animated: true, completion: nil)
+    func showSearchDialog(title: String, message: String) {
+        if instanceSearchController == nil {
+            instanceSearchController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+            instanceSearchController.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+            present(instanceSearchController, animated: true, completion: nil)
+        }
+    }
+    
+    func hideSearchDialog() {
+        if instanceSearchController != nil {
+            instanceSearchController.dismiss(animated: true, completion: nil)
+        }
+    }
+    
+    // example of currying in Swift
+    func handleConfirmPressed(instance: HYPInstance!) -> (_ alertAction:UIAlertAction) -> () {
+        return {_ in
+            self.resolvedInstance = instance
+            NSLog("Hype will communicate with instance %@", instance.appStringIdentifier!)
+        }
+    }
+    
+    func showDidResolveDialog(title: String, message: String, instance: HYPInstance!) {
+        if didResolveController == nil {
+            didResolveController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+            didResolveController.addAction(UIAlertAction(title: "OK", style: .cancel, handler: handleConfirmPressed(instance: instance)))
+            present(didResolveController, animated: true, completion: nil)
+        }
+    }
+    
+    func hideDidResolveDialog() {
+        if didResolveController != nil {
+            didResolveController.dismiss(animated: true, completion: nil)
+        }
     }
     
     func requestHypeToStart() {
@@ -75,6 +102,9 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
 
     func hypeDidStart() {
         NSLog("Hype started!")
+        DispatchQueue.main.async {
+            self.showSearchDialog(title: "Hype started", message: "Looking for instances")
+        }
     }
 
     func hypeDidStopWithError(_ error: HYPError!) {
@@ -86,12 +116,6 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
         NSLog("Hype failed starting [%@]", error.description)
         NSLog("Hype code [%d]", error.code.rawValue)
         NSLog("Hype suggestion [%@]", error.suggestion)
-        
-        // return alert
-        //        let errorMessage : String = "Description: " + (error.description as String) + "\nReason:" + (error.reason as String)  + "\nSuggestion:" + (error.suggestion as String)
-        //        let alert = UIAlertController(title: "Hype failed starting", message: errorMessage, preferredStyle: UIAlertControllerStyle.alert)
-        //        alert.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.default, handler: nil))
-        //        self.present(alert, animated: true, completion: nil)
     }
 
     func hypeDidChangeState()
@@ -121,10 +145,10 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
     func hypeDidResolve(_ instance: HYPInstance!)
     {
         NSLog("Hype resolved instance: %@", instance.stringIdentifier!)
-        resolvedInstance = instance
-//        instanceSearchView.isHidden = false
-        //        // This device is now capable of communicating
-        //        addToResolvedInstancesDict(instance)
+        DispatchQueue.main.async {
+            self.hideSearchDialog()
+            self.showDidResolveDialog(title: "Hype instance found", message: instance.stringIdentifier, instance: instance)
+        }
     }
 
     func hypeDidFailResolving(_ instance: HYPInstance!, error: HYPError!) {
