@@ -18,8 +18,8 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
   var member: Member!
   var communicator: Communicator!
   var resolvedInstance: HYPInstance!
-  var instanceSearchController: UIAlertController!
-  var didResolveController: UIAlertController!
+  var dialog: UIAlertController!
+  var displaying: Bool!
   private var instanceSearchView: UIView!
   
   override func viewDidLoad() {
@@ -29,9 +29,7 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
     messagesCollectionView.messagesLayoutDelegate = self
     messageInputBar.delegate = self
     messagesCollectionView.messagesDisplayDelegate = self
-//    communicator = Communicator()
-//    communicator.requestHypeToStart()
-//    loadCustomViewIntoController()
+    displaying = false
     requestHypeToStart()
     
     chatService = ChatService(member: member, onRecievedMessage: {
@@ -46,21 +44,49 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
         super.viewDidAppear(animated)
     }
     
+    // this should be only ONE reference since only one dialog open at a time
     func showSearchDialog(title: String, message: String) {
-        if instanceSearchController == nil {
-            instanceSearchController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            present(instanceSearchController, animated: true, completion: nil)
+        if displaying == false {
+            NSLog("showSearchDialog")
+            dialog = UIAlertController(title: title, message: message, preferredStyle: .alert)
+            present(dialog, animated: true, completion: nil)
+            displaying = true
         }
     }
     
-    func hideSearchDialog() {
-        if instanceSearchController != nil {
-            instanceSearchController.dismiss(animated: true, completion: nil)
+    func showMessageSendingDialog() {
+        if displaying == false {
+            NSLog("showMessageSendingDialog")
+            dialog = UIAlertController(title: "Hype sending", message: "Sending message to instance...", preferredStyle: .alert)
+            present(dialog, animated: true, completion: nil)
+            displaying = true
+        }
+    }
+    
+    func showMessageFailedSendingDialog() {
+        if displaying == false {
+            NSLog("showMessageFailedSendingDialog")
+            dialog = UIAlertController(title: "Hype failed sending", message: "Sending message to instance failed", preferredStyle: .alert)
+            dialog.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+            present(dialog, animated: true, completion: nil)
+            displaying = true
+        }
+    }
+    
+    // passing closure as parameter
+    func dismissDialog() {
+        if displaying == true {
+            NSLog("dismissDialog")
+            if resolvedInstance == nil {
+                NSLog("resolvedInstance is nil")
+            }
+            dialog.dismiss(animated: true, completion: nil)
+            displaying = false
         }
     }
     
     // example of currying in Swift
-    func handleConfirmPressed(instance: HYPInstance!) -> (_ alertAction:UIAlertAction) -> () {
+    func handleConfirmPressed(instance: HYPInstance!) -> (_ alertAction: UIAlertAction) -> () {
         return {_ in
             self.resolvedInstance = instance
             NSLog("Hype will communicate with instance %@", instance.appStringIdentifier!)
@@ -68,41 +94,28 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
     }
     
     func showDidResolveDialog(title: String, message: String, instance: HYPInstance!) {
-        if didResolveController == nil {
-            didResolveController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            didResolveController.addAction(UIAlertAction(title: "OK", style: .cancel, handler: handleConfirmPressed(instance: instance)))
-            present(didResolveController, animated: true, completion: nil)
+        if displaying == false {
+            NSLog("showDidResolveDialog")
+            dialog = UIAlertController(title: title, message: message, preferredStyle: .alert)
+            dialog.addAction(UIAlertAction(title: "OK", style: .default, handler: handleConfirmPressed(instance: instance)))
+            dialog.addAction(UIAlertAction(title: "CANCEL", style: .cancel, handler: nil))
+            present(dialog, animated: true, completion: nil)
+            displaying = true
         }
     }
     
-    func hideDidResolveDialog() {
-        if didResolveController != nil {
-            didResolveController.dismiss(animated: true, completion: nil)
-        }
-    }
     
     func requestHypeToStart() {
-        
-        // Add self as an Hype observer
         HYP.add(self as HYPStateObserver)
         HYP.add(self as HYPNetworkObserver)
         HYP.add(self as HYPMessageObserver)
-        
-        //        HYP.setAnnouncement(self.announcement.data(using: .utf8))
-        
-        // Generate an app identifier in the HypeLabs dashboard (https://hypelabs.io/apps/),
-        // by creating a new app. Copy the given identifier here.
         HYP.setAppIdentifier("c990ae8f")
-        
         HYP.start()
-        
-        //        // Update the text label
-        //        self.updateHypeInstancesLabel()
     }
 
     func hypeDidStart() {
         NSLog("Hype started!")
-        DispatchQueue.main.async {
+        DispatchQueue.main.sync {
             self.showSearchDialog(title: "Hype started", message: "Searching for instances...")
         }
     }
@@ -118,15 +131,12 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
         NSLog("Hype suggestion [%@]", error.suggestion)
     }
 
-    func hypeDidChangeState()
-    {
+    func hypeDidChangeState() {
         NSLog("Hype state changed to [%d] (Idle=0, Starting=1, Running=2, Stopping=3)", HYP.state().rawValue)
     }
 
     func hypeDidBecomeReady() {
         NSLog("Hype is ready")
-        
-        // Where're here due to a failed start request, try again
         requestHypeToStart()
     }
 
@@ -139,18 +149,19 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
     }
 
     func hypeDidLose(_ instance: HYPInstance!, error: HYPError!) {
-        NSLog("Hype did lost instance %@ [%s]", instance.appStringIdentifier!, error.description)
+        NSLog("Hype did lose instance %@ [%s]", instance.appStringIdentifier!, error.description)
         DispatchQueue.main.async {
             self.showSearchDialog(title: "Hype instance lost", message: "Searching for instances...")
         }
     }
 
-    func hypeDidResolve(_ instance: HYPInstance!)
-    {
+    func hypeDidResolve(_ instance: HYPInstance!) {
         NSLog("Hype resolved instance: %@", instance.stringIdentifier!)
         DispatchQueue.main.async {
-            self.hideSearchDialog()
-            self.showDidResolveDialog(title: "Hype instance found", message: instance.stringIdentifier, instance: instance)
+            // example of closure in Swift
+            // self contained block of code executed on completion
+            self.dismissDialog()
+            self.showDidResolveDialog(title: "Hype instance found", message: String(format: "Instance found: %@\nDo you wish to communicate?", instance.stringIdentifier), instance: instance)
         }
     }
 
@@ -162,8 +173,7 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
         NSLog("Hype did receive %d %@", message.info.identifier, fromInstance.appStringIdentifier!)
         let msg = (NSString(data: (message?.data)!, encoding: String.Encoding.utf8.rawValue)! as String)
         NSLog("Hype msg recieved [%@]", msg)
-//        let msg = (NSString(data: (message?.data)!, encoding: String.Encoding.utf8.rawValue)! as String
-        DispatchQueue.main.async {
+        DispatchQueue.main.sync {
             self.messages.append(Message(member: Member(name: "other", color: UIColor(displayP3Red: 1.0, green: 1.0, blue: 0.0, alpha: 1.0)), text: msg, messageId: "32"))
             self.messagesCollectionView.reloadData()
             self.messagesCollectionView.scrollToBottom(animated: true)
@@ -172,6 +182,13 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
 
     func hypeDidFailSendingMessage(_ messageInfo: HYPMessageInfo!, to toInstance: HYPInstance!, error: HYPError!) {
         NSLog("Hype did fail sending  %d %@ %s", messageInfo.identifier, toInstance.appStringIdentifier!, error.description)
+    }
+    
+    func hypeDidDeliverMessage(_ messageInfo: HYPMessageInfo!, to toInstance: HYPInstance!, progress: Float, complete: Bool) {
+        NSLog("Hype did successfully deliver  %d %@ %f %b", messageInfo.identifier, toInstance.appStringIdentifier!, progress, complete)
+        DispatchQueue.main.sync {
+            self.dismissDialog()
+        }
     }
 
 }
@@ -239,11 +256,20 @@ extension ViewController: MessageInputBarDelegate {
         
         let data: Data? = text.data(using: String.Encoding.utf8)
         
-        let _: HYPMessage? = HYP.send(data, to: self.resolvedInstance)
-        messageCallback(message: chatMessage)
+        if self.resolvedInstance != nil {
+            let _: HYPMessage? = HYP.send(data, to: self.resolvedInstance)
+            messageCallback(message: chatMessage)
+        }
+        else {
+            DispatchQueue.main.sync {
+                self.showMessageFailedSendingDialog()
+            }
+        }
     }
+    
     func messageCallback(message: Message) {
         DispatchQueue.main.async {
+            self.showMessageSendingDialog()
             self.messages.append(message)
             self.messagesCollectionView.reloadData()
             self.messagesCollectionView.scrollToBottom(animated: true)

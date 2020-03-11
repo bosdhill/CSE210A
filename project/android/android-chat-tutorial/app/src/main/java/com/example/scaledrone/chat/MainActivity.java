@@ -149,6 +149,15 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
         dialog.show();
     }
 
+    public void showMessageSendingDialog() {
+        final AlertDialog.Builder confirm = new AlertDialog.Builder(MainActivity.this)
+                .setTitle("Hype sending")
+                .setMessage("Sending message to instance...")
+                .setIcon(android.R.drawable.ic_dialog_alert);
+        dialog = confirm.create();
+        dialog.show();
+    }
+
     public void showSentFailedDialog(Instance instance) {
         final AlertDialog.Builder confirm = new AlertDialog.Builder(MainActivity.this)
                 .setTitle("Sending Failed")
@@ -156,11 +165,10 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         Log.i(TAG, "Hype sent failed dialog clicked");
-//                        setResolveDialogIsOpen(false);
                     }
                 })
                 .setIcon(android.R.drawable.ic_dialog_alert);
-        final AlertDialog dialog = confirm.create();
+        dialog = confirm.create();
         dialog.show();
     }
 
@@ -171,7 +179,9 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                showSentFailedDialog(inst);
+                if (dialog == null) {
+                    showSentFailedDialog(inst);
+                }
             }
         });
     }
@@ -184,6 +194,15 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
     @Override
     public void onHypeMessageDelivered(MessageInfo messageInfo, Instance instance, float v, boolean b) {
         Log.i(TAG, String.format("Hype message delivered %s %s [%f] %b", messageInfo.getIdentifier(), instance.getStringIdentifier(), v, b));
+
+        if (dialog != null) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    dialog.dismiss();
+                }
+            });
+        }
     }
 
     boolean shouldResolveInstance(Instance instance) {
@@ -213,30 +232,30 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                showInstanceSearchDialog();
+                if (dialog == null) {
+                    showInstanceSearchDialog();
+                }
             }
         });
     }
 
     public void showResolveDialog(Instance instance) {
-        setResolveDialogIsOpen(true);
         final AlertDialog.Builder confirm = new AlertDialog.Builder(MainActivity.this)
-                .setTitle("New Instance Resolved")
+                .setTitle("Hype instance resolved")
                 .setMessage(String.format("Instance found: %s\nDo you wish to communicate?", instance.getStringIdentifier()))
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         Log.d(TAG, "Hype will communicate with instance");
-                        setResolveDialogIsOpen(false);
                     }
                 })
                 .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        setResolveDialogIsOpen(false);
+                        dialog.dismiss();
                     }
                 })
                 .setIcon(android.R.drawable.ic_dialog_alert);
-        final AlertDialog dialog = confirm.create();
+        dialog = confirm.create();
         dialog.show();
     }
 
@@ -253,7 +272,9 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
                     if (dialog != null) {
                         dialog.dismiss();
                     }
-                    showResolveDialog(instance);
+                    if (dialog == null) {
+                        showResolveDialog(instance);
+                    }
                 }
             });
         }
@@ -270,7 +291,9 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                showInstanceSearchDialog();
+                if (dialog == null) {
+                    showInstanceSearchDialog();
+                }
             }
         });
     }
@@ -344,6 +367,9 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    if (dialog == null) {
+                        showMessageSendingDialog();
+                    }
                     messageAdapter.add(m);
                     messagesView.setSelection(messagesView.getCount() - 1);
                 }
