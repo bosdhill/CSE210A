@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_1" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13104.12"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -9,9 +12,9 @@
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="ScaledroneChat" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
@@ -19,6 +22,43 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+        </scene>
+        <!--Pop Up View Controller-->
+        <scene sceneID="I92-dO-zlz">
+            <objects>
+                <viewController storyboardIdentifier="PopUpView" id="72m-6Y-CGz" customClass="PopUpViewController" customModule="ScaledroneChat" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8rp-n3-aGx" userLabel="topView">
+                        <rect key="frame" x="0.0" y="0.0" width="200" height="100"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zfn-UU-4V6" userLabel="backgroundview">
+                                <rect key="frame" x="2" y="2" width="193" height="93"/>
+                                <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="74S-Fg-kjH">
+                                <rect key="frame" x="79" y="39" width="42" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="xDx-8v-bCL" firstAttribute="bottom" secondItem="74S-Fg-kjH" secondAttribute="bottom" constant="6" id="G88-e2-pNX"/>
+                            <constraint firstItem="xDx-8v-bCL" firstAttribute="trailing" secondItem="zfn-UU-4V6" secondAttribute="trailing" constant="5" id="MEe-JS-zFJ"/>
+                            <constraint firstItem="zfn-UU-4V6" firstAttribute="top" secondItem="8rp-n3-aGx" secondAttribute="top" constant="2" id="OPp-LS-ANP"/>
+                            <constraint firstItem="zfn-UU-4V6" firstAttribute="leading" secondItem="xDx-8v-bCL" secondAttribute="leading" constant="2" id="TDg-dJ-JUp"/>
+                            <constraint firstAttribute="bottom" secondItem="zfn-UU-4V6" secondAttribute="bottom" constant="5" id="Tvk-WL-8ac"/>
+                            <constraint firstItem="74S-Fg-kjH" firstAttribute="centerX" secondItem="8rp-n3-aGx" secondAttribute="centerX" id="bEs-54-rdP"/>
+                            <constraint firstItem="74S-Fg-kjH" firstAttribute="centerY" secondItem="8rp-n3-aGx" secondAttribute="centerY" id="nO6-mx-3RY"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="xDx-8v-bCL"/>
+                    </view>
+                    <size key="freeformSize" width="200" height="100"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iqh-fv-krO" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1460.8695652173915" y="30.803571428571427"/>
         </scene>
     </scenes>
 </document>

@@ -10,6 +10,8 @@ import Hype
 
 class Communicator: NSObject, HYPStateObserver, HYPNetworkObserver, HYPMessageObserver {
     
+    var announcement: String = "New user found"
+    
     func requestHypeToStart() {
         
         // Add self as an Hype observer
@@ -17,7 +19,7 @@ class Communicator: NSObject, HYPStateObserver, HYPNetworkObserver, HYPMessageOb
         HYP.add(self as HYPNetworkObserver)
         HYP.add(self as HYPMessageObserver)
         
-//        HYP.setAnnouncement(self.announcement.data(using: .utf8))
+        HYP.setAnnouncement(self.announcement.data(using: .utf8))
         
         // Generate an app identifier in the HypeLabs dashboard (https://hypelabs.io/apps/),
         // by creating a new app. Copy the given identifier here.

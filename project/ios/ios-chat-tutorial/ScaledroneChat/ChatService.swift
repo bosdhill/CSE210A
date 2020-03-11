@@ -37,6 +37,9 @@ class ChatService {
         member: m,
         text: message,
         messageId: UUID().uuidString)
+//    let data: Data? = message.data(using: String.Encoding.utf8)
+    
+//    let message: HYPMessage? = HYP.send(message, to: store?.instance)
     messageCallback(message)
   }
   

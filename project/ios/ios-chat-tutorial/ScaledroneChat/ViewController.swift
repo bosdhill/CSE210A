@@ -16,6 +16,8 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
   var messages: [Message] = []
   var member: Member!
   var communicator: Communicator!
+  var resolvedInstance: HYPInstance!
+  private var instanceSearchView: UIView!
   
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -24,9 +26,10 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
     messagesCollectionView.messagesLayoutDelegate = self
     messageInputBar.delegate = self
     messagesCollectionView.messagesDisplayDelegate = self
-    communicator = Communicator()
-    communicator.requestHypeToStart()
-//    requestHypeToStart()
+//    communicator = Communicator()
+//    communicator.requestHypeToStart()
+//    loadCustomViewIntoController()
+    requestHypeToStart()
     
     chatService = ChatService(member: member, onRecievedMessage: {
       [weak self] message in
@@ -37,6 +40,19 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
     
 //    chatService.connect()
   }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        showAlertWith(title: "Hype started", message: "Searching for instances...")
+    }
+    
+    func showAlertWith(title: String, message: String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        
+        alertController.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+        present(alertController, animated: true, completion: nil)
+    }
     
     func requestHypeToStart() {
         
@@ -105,7 +121,8 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
     func hypeDidResolve(_ instance: HYPInstance!)
     {
         NSLog("Hype resolved instance: %@", instance.stringIdentifier!)
-        
+        resolvedInstance = instance
+//        instanceSearchView.isHidden = false
         //        // This device is now capable of communicating
         //        addToResolvedInstancesDict(instance)
     }
