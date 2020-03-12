@@ -1,9 +1,7 @@
 package com.example.scaledrone.chat
 
 import android.app.AlertDialog
-import android.os.Build
 import android.os.Bundle
-import android.support.annotation.RequiresApi
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
@@ -11,7 +9,6 @@ import android.widget.EditText
 import android.widget.ListView
 import com.hypelabs.hype.*
 import java.io.UnsupportedEncodingException
-import java.nio.charset.StandardCharsets;
 
 class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, MessageObserver {
     private var TAG = MainActivity::class.simpleName
@@ -69,18 +66,17 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
         Hype.start()
     }
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onHypeMessageReceived(message: com.hypelabs.hype.Message, instance: Instance) {
         Log.i(TAG, String.format("Hype message received %s %s", message.identifier, instance.stringIdentifier))
         var text: String? = null
         try {
-            text = String(message.data, StandardCharsets.UTF_8)
+            text = String(message.data, charset("UTF_8"))
             // If all goes well, this will log the original text
             Log.i(TAG, String.format("Hype received a message from: %s %s", instance.stringIdentifier, text))
         } catch (e: UnsupportedEncodingException) {
             e.printStackTrace()
         }
-        val chatMessage = ChatMessage(text, MemberData("other", "red"), false)
+        val chatMessage = ChatMessage(message, MemberData("other", "red"), false)
         runOnUiThread {
             messageAdapter!!.add(chatMessage)
             messagesView!!.setSelection(messagesView!!.count - 1)
@@ -232,16 +228,16 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
             val sentMessage: com.hypelabs.hype.Message
             try {
                 sentMessage = sendMessage(message, resolvedInstance, true)
+                val mData = MemberData("Bobby", "")
+                val m = ChatMessage(sentMessage, mData, true)
+                runOnUiThread {
+                    messageAdapter!!.add(m)
+                    messagesView!!.setSelection(messagesView!!.count - 1)
+                }
+                editText!!.text.clear()
             } catch (e: UnsupportedEncodingException) {
                 e.printStackTrace()
             }
-            val mData = MemberData("Bobby", "")
-            val m = ChatMessage(message, mData, true)
-            runOnUiThread {
-                messageAdapter!!.add(m)
-                messagesView!!.setSelection(messagesView!!.count - 1)
-            }
-            editText!!.text.clear()
         }
     }
 
@@ -251,7 +247,7 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
 
 }
 
-internal class MemberData {
+class MemberData {
     var name: String? = null
         private set
     var color: String? = null
