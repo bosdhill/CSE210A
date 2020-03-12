@@ -9,26 +9,16 @@ import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.ListView
-import com.example.scaledrone.chat.MainActivity
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.hypelabs.hype.*
-import com.scaledrone.lib.*
-import com.scaledrone.lib.Message
 import java.io.UnsupportedEncodingException
-import java.util.*
 import java.nio.charset.StandardCharsets;
 
-class MainActivity : AppCompatActivity(), RoomListener, StateObserver, NetworkObserver, MessageObserver {
-    private val channelID = "CHANNEL_ID_FROM_YOUR_SCALEDRONE_DASHBOARD"
-    private val roomName = "observable-room"
+class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, MessageObserver {
+    private var TAG = MainActivity::class.simpleName
     private var editText: EditText? = null
-    private var scaledrone: Scaledrone? = null
-    private val communicator: Communicator? = null
     private var messageAdapter: ChatMessageAdapter? = null
     private var messagesView: ListView? = null
     private var resolvedInstance: Instance? = null
-    var isAttached = false
     var isResolveDialogOpen = false
         private set
     private var dialog: AlertDialog? = null
@@ -39,27 +29,7 @@ class MainActivity : AppCompatActivity(), RoomListener, StateObserver, NetworkOb
         messageAdapter = ChatMessageAdapter(this)
         messagesView = findViewById<View>(R.id.messages_view) as ListView
         messagesView!!.adapter = messageAdapter
-        val data = MemberData(randomName, randomColor)
         requestHypeToStart()
-        scaledrone = Scaledrone(channelID, data)
-        scaledrone!!.connect(object : Listener {
-            override fun onOpen() {
-                println("Scaledrone connection open")
-                scaledrone!!.subscribe(roomName, this@MainActivity)
-            }
-
-            override fun onOpenFailure(ex: Exception) {
-                System.err.println(ex)
-            }
-
-            override fun onFailure(ex: Exception) {
-                System.err.println(ex)
-            }
-
-            override fun onClosed(reason: String) {
-                System.err.println(reason)
-            }
-        })
     }
 
     protected fun requestHypeToStart() {
@@ -275,56 +245,10 @@ class MainActivity : AppCompatActivity(), RoomListener, StateObserver, NetworkOb
         }
     }
 
-    override fun onOpen(room: Room) {
-        println("Connected to room")
-    }
-
-    override fun onOpenFailure(room: Room, ex: Exception) {
-        System.err.println(ex)
-    }
-
-    override fun onMessage(room: Room, receivedMessage: Message) {
-        val mapper = ObjectMapper()
-        try {
-            val data = mapper.treeToValue(receivedMessage.member.clientData, MemberData::class.java)
-            val belongsToCurrentUser = receivedMessage.clientID == scaledrone!!.clientID
-            val message = ChatMessage(receivedMessage.data.asText(), data, belongsToCurrentUser)
-            runOnUiThread {
-                messageAdapter!!.add(message)
-                messagesView!!.setSelection(messagesView!!.count - 1)
-            }
-        } catch (e: JsonProcessingException) {
-            e.printStackTrace()
-        }
-    }
-
-    private val randomName: String
-        private get() {
-            val adjs = arrayOf("autumn", "hidden", "bitter", "misty", "silent", "empty", "dry", "dark", "summer", "icy", "delicate", "quiet", "white", "cool", "spring", "winter", "patient", "twilight", "dawn", "crimson", "wispy", "weathered", "blue", "billowing", "broken", "cold", "damp", "falling", "frosty", "green", "long", "late", "lingering", "bold", "little", "morning", "muddy", "old", "red", "rough", "still", "small", "sparkling", "throbbing", "shy", "wandering", "withered", "wild", "black", "young", "holy", "solitary", "fragrant", "aged", "snowy", "proud", "floral", "restless", "divine", "polished", "ancient", "purple", "lively", "nameless")
-            val nouns = arrayOf("waterfall", "river", "breeze", "moon", "rain", "wind", "sea", "morning", "snow", "lake", "sunset", "pine", "shadow", "leaf", "dawn", "glitter", "forest", "hill", "cloud", "meadow", "sun", "glade", "bird", "brook", "butterfly", "bush", "dew", "dust", "field", "fire", "flower", "firefly", "feather", "grass", "haze", "mountain", "night", "pond", "darkness", "snowflake", "silence", "sound", "sky", "shape", "surf", "thunder", "violet", "water", "wildflower", "wave", "water", "resonance", "sun", "wood", "dream", "cherry", "tree", "fog", "frost", "voice", "paper", "frog", "smoke", "star")
-            return adjs[Math.floor(Math.random() * adjs.size).toInt()] +
-                    "_" +
-                    nouns[Math.floor(Math.random() * nouns.size).toInt()]
-        }
-
-    private val randomColor: String
-        private get() {
-            val r = Random()
-            val sb = StringBuffer("#")
-            while (sb.length < 7) {
-                sb.append(Integer.toHexString(r.nextInt()))
-            }
-            return sb.toString().substring(0, 7)
-        }
-
     fun setResolveDialogIsOpen(resolveDialogIsOpen: Boolean) {
         isResolveDialogOpen = resolveDialogIsOpen
     }
 
-    companion object {
-        // replace this with a real channelID from Scaledrone dashboard
-        private val TAG = MainActivity::class.java.name
-    }
 }
 
 internal class MemberData {
