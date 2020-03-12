@@ -11,6 +11,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 //import com.hypelabs.hype.Message;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +56,12 @@ public class ChatMessageAdapter extends BaseAdapter {
             convertView = messageInflater.inflate(R.layout.my_message, null);
             holder.messageBody = (TextView) convertView.findViewById(R.id.message_body);
             convertView.setTag(holder);
-            holder.messageBody.setText(message.getText());
+            try {
+                String text = new String(message.getMessage().getData(), "UTF-8");
+                holder.messageBody.setText(text);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         } else {
             convertView = messageInflater.inflate(R.layout.their_message, null);
             holder.avatar = (View) convertView.findViewById(R.id.avatar);
@@ -64,7 +70,12 @@ public class ChatMessageAdapter extends BaseAdapter {
             convertView.setTag(holder);
 
             holder.name.setText(message.getMemberData().getName());
-            holder.messageBody.setText(message.getText());
+            try {
+                String text = new String(message.getMessage().getData(), "UTF-8");
+                holder.messageBody.setText(text);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             GradientDrawable drawable = (GradientDrawable) holder.avatar.getBackground();
             drawable.setColor(Color.parseColor(message.getMemberData().getColor()));
         }

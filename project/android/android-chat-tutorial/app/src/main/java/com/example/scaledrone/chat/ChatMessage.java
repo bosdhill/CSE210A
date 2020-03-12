@@ -1,18 +1,19 @@
 package com.example.scaledrone.chat;
+import com.hypelabs.hype.*;
 
 public class ChatMessage {
-    private String text;
+    private Message message;
     private MemberData memberData;
     private boolean belongsToCurrentUser;
 
-    public ChatMessage(String text, MemberData data, boolean belongsToCurrentUser) {
-        this.text = text;
+    public ChatMessage(Message message, MemberData data, boolean belongsToCurrentUser) {
+        this.message = message;
         this.memberData = data;
         this.belongsToCurrentUser = belongsToCurrentUser;
     }
 
-    public String getText() {
-        return text;
+    public Message getMessage() {
+        return message;
     }
 
     public MemberData getMemberData() {

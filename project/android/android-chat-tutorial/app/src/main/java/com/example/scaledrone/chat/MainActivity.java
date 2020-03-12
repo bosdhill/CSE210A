@@ -8,8 +8,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import android.util.Log;
 
 import com.hypelabs.hype.Error;
@@ -20,27 +18,17 @@ import com.hypelabs.hype.MessageInfo;
 import com.hypelabs.hype.MessageObserver;
 import com.hypelabs.hype.NetworkObserver;
 import com.hypelabs.hype.StateObserver;
-import com.scaledrone.lib.Listener;
-import com.scaledrone.lib.Room;
-import com.scaledrone.lib.RoomListener;
-import com.scaledrone.lib.Scaledrone;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Random;
 
-public class MainActivity extends AppCompatActivity implements RoomListener, StateObserver, NetworkObserver, MessageObserver {
+public class MainActivity extends AppCompatActivity implements StateObserver, NetworkObserver, MessageObserver {
 
     // replace this with a real channelID from Scaledrone dashboard
     private static String TAG = MainActivity.class.getName();
-    private String channelID = "CHANNEL_ID_FROM_YOUR_SCALEDRONE_DASHBOARD";
-    private String roomName = "observable-room";
     private EditText editText;
-    private Scaledrone scaledrone;
-    private Communicator communicator;
     private ChatMessageAdapter messageAdapter;
     private ListView messagesView;
     private Instance resolvedInstance;
-    private boolean attached;
     private boolean resolveDialogIsOpen = false;
     private AlertDialog dialog;
 
@@ -53,33 +41,7 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
         messageAdapter = new ChatMessageAdapter(this);
         messagesView = (ListView) findViewById(R.id.messages_view);
         messagesView.setAdapter(messageAdapter);
-
-        MemberData data = new MemberData(getRandomName(), getRandomColor());
-
         requestHypeToStart();
-        scaledrone = new Scaledrone(channelID, data);
-        scaledrone.connect(new Listener() {
-            @Override
-            public void onOpen() {
-                System.out.println("Scaledrone connection open");
-                scaledrone.subscribe(roomName, MainActivity.this);
-            }
-
-            @Override
-            public void onOpenFailure(Exception ex) {
-                System.err.println(ex);
-            }
-
-            @Override
-            public void onFailure(Exception ex) {
-                System.err.println(ex);
-            }
-
-            @Override
-            public void onClosed(String reason) {
-                System.err.println(reason);
-            }
-        });
     }
 
     protected void requestHypeToStart() {
@@ -130,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        final ChatMessage chatMessage = new ChatMessage(text, new MemberData("other","red") , false);
+        final ChatMessage chatMessage = new ChatMessage(message, new MemberData("other","red") , false);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -336,76 +298,20 @@ public class MainActivity extends AppCompatActivity implements RoomListener, Sta
             Message sentMessage;
             try {
              sentMessage = sendMessage(message, resolvedInstance, true);
+             final MemberData mData = new MemberData("Bobby", "");
+             final ChatMessage m = new ChatMessage(sentMessage, mData, true);
+             runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        messageAdapter.add(m);
+                        messagesView.setSelection(messagesView.getCount() - 1);
+                    }
+                });
+             editText.getText().clear();
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
-            final MemberData mData = new MemberData("Bobby", "");
-            final ChatMessage m = new ChatMessage(message, mData, true);
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    messageAdapter.add(m);
-                    messagesView.setSelection(messagesView.getCount() - 1);
-                }
-            });
-            editText.getText().clear();
         }
-    }
-
-    @Override
-    public void onOpen(Room room) {
-        System.out.println("Connected to room");
-    }
-
-    @Override
-    public void onOpenFailure(Room room, Exception ex) {
-        System.err.println(ex);
-    }
-
-    @Override
-    public void onMessage(Room room, com.scaledrone.lib.Message receivedMessage) {
-        final ObjectMapper mapper = new ObjectMapper();
-        try {
-            final MemberData data = mapper.treeToValue(receivedMessage.getMember().getClientData(), MemberData.class);
-            boolean belongsToCurrentUser = receivedMessage.getClientID().equals(scaledrone.getClientID());
-            final ChatMessage message = new ChatMessage(receivedMessage.getData().asText(), data, belongsToCurrentUser);
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    messageAdapter.add(message);
-                    messagesView.setSelection(messagesView.getCount() - 1);
-                }
-            });
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private String getRandomName() {
-        String[] adjs = {"autumn", "hidden", "bitter", "misty", "silent", "empty", "dry", "dark", "summer", "icy", "delicate", "quiet", "white", "cool", "spring", "winter", "patient", "twilight", "dawn", "crimson", "wispy", "weathered", "blue", "billowing", "broken", "cold", "damp", "falling", "frosty", "green", "long", "late", "lingering", "bold", "little", "morning", "muddy", "old", "red", "rough", "still", "small", "sparkling", "throbbing", "shy", "wandering", "withered", "wild", "black", "young", "holy", "solitary", "fragrant", "aged", "snowy", "proud", "floral", "restless", "divine", "polished", "ancient", "purple", "lively", "nameless"};
-        String[] nouns = {"waterfall", "river", "breeze", "moon", "rain", "wind", "sea", "morning", "snow", "lake", "sunset", "pine", "shadow", "leaf", "dawn", "glitter", "forest", "hill", "cloud", "meadow", "sun", "glade", "bird", "brook", "butterfly", "bush", "dew", "dust", "field", "fire", "flower", "firefly", "feather", "grass", "haze", "mountain", "night", "pond", "darkness", "snowflake", "silence", "sound", "sky", "shape", "surf", "thunder", "violet", "water", "wildflower", "wave", "water", "resonance", "sun", "wood", "dream", "cherry", "tree", "fog", "frost", "voice", "paper", "frog", "smoke", "star"};
-        return (
-            adjs[(int) Math.floor(Math.random() * adjs.length)] +
-            "_" +
-            nouns[(int) Math.floor(Math.random() * nouns.length)]
-        );
-    }
-
-    private String getRandomColor() {
-        Random r = new Random();
-        StringBuffer sb = new StringBuffer("#");
-        while(sb.length() < 7){
-            sb.append(Integer.toHexString(r.nextInt()));
-        }
-        return sb.toString().substring(0, 7);
-    }
-
-    public boolean isAttached() {
-        return attached;
-    }
-
-    public void setAttached(boolean attached) {
-        this.attached = attached;
     }
 
     public boolean isResolveDialogOpen() {
