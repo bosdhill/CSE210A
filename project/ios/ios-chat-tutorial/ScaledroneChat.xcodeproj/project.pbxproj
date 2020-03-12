@@ -9,17 +9,13 @@
 /* Begin PBXBuildFile section */
 		3BD6B23DDC53C21E88612791 /* Pods_ScaledroneChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 082CBBE5F5A8D8EF116B16E4 /* Pods_ScaledroneChat.framework */; };
 		DF26222B240B590300174058 /* Hype.framework in Embed Libraries */ = {isa = PBXBuildFile; fileRef = DF262229240B590300174058 /* Hype.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		DF26222D240B9CD100174058 /* Communicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF26222C240B9CD100174058 /* Communicator.swift */; };
 		DF949E03240B5549009B2055 /* Hype.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DF949E02240B5549009B2055 /* Hype.framework */; };
-		DFE0706624188D0F00CD6C29 /* PopUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFE0706524188D0F00CD6C29 /* PopUpViewController.swift */; };
 		F51FC96A2143A823001F9009 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51FC9692143A823001F9009 /* AppDelegate.swift */; };
 		F51FC96C2143A823001F9009 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51FC96B2143A823001F9009 /* ViewController.swift */; };
 		F51FC96F2143A823001F9009 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F51FC96D2143A823001F9009 /* Main.storyboard */; };
 		F51FC9712143A824001F9009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F51FC9702143A824001F9009 /* Assets.xcassets */; };
 		F51FC9742143A824001F9009 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F51FC9722143A824001F9009 /* LaunchScreen.storyboard */; };
 		F51FC97C2143A8E5001F9009 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51FC97B2143A8E5001F9009 /* Message.swift */; };
-		F51FC97E2143AC63001F9009 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51FC97D2143AC63001F9009 /* Extensions.swift */; };
-		F51FC9802143AD46001F9009 /* ChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51FC97F2143AD46001F9009 /* ChatService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -43,10 +39,8 @@
 		6F129B3DA0100A4D961A4F53 /* Pods_ScaledroneChatTest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ScaledroneChatTest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9EDD2FBD26B14939767C3E1A /* Pods-ScaledroneChatTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ScaledroneChatTest.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ScaledroneChatTest/Pods-ScaledroneChatTest.debug.xcconfig"; sourceTree = "<group>"; };
 		DF262229240B590300174058 /* Hype.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Hype.framework; path = Hype/Hype.framework; sourceTree = "<group>"; };
-		DF26222C240B9CD100174058 /* Communicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Communicator.swift; sourceTree = "<group>"; };
 		DF949DFF240B51C0009B2055 /* Hype */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Hype; path = ../../../../../hype/HypeiOS/Hype.framework/Hype; sourceTree = "<group>"; };
 		DF949E02240B5549009B2055 /* Hype.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Hype.framework; path = ../../../../../hype/HypeiOS/Hype.framework; sourceTree = "<group>"; };
-		DFE0706524188D0F00CD6C29 /* PopUpViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopUpViewController.swift; sourceTree = "<group>"; };
 		E0DC8D108C38EC38D898977F /* Pods-ScaledroneChatTest.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ScaledroneChatTest.release.xcconfig"; path = "Pods/Target Support Files/Pods-ScaledroneChatTest/Pods-ScaledroneChatTest.release.xcconfig"; sourceTree = "<group>"; };
 		F51FC9662143A823001F9009 /* ScaledroneChat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScaledroneChat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F51FC9692143A823001F9009 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -56,8 +50,6 @@
 		F51FC9732143A824001F9009 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		F51FC9752143A824001F9009 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F51FC97B2143A8E5001F9009 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
-		F51FC97D2143AC63001F9009 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
-		F51FC97F2143AD46001F9009 /* ChatService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,10 +116,6 @@
 				F51FC9722143A824001F9009 /* LaunchScreen.storyboard */,
 				F51FC9752143A824001F9009 /* Info.plist */,
 				F51FC97B2143A8E5001F9009 /* Message.swift */,
-				F51FC97D2143AC63001F9009 /* Extensions.swift */,
-				F51FC97F2143AD46001F9009 /* ChatService.swift */,
-				DF26222C240B9CD100174058 /* Communicator.swift */,
-				DFE0706524188D0F00CD6C29 /* PopUpViewController.swift */,
 			);
 			path = ScaledroneChat;
 			sourceTree = "<group>";
@@ -249,13 +237,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DF26222D240B9CD100174058 /* Communicator.swift in Sources */,
 				F51FC97C2143A8E5001F9009 /* Message.swift in Sources */,
-				DFE0706624188D0F00CD6C29 /* PopUpViewController.swift in Sources */,
 				F51FC96C2143A823001F9009 /* ViewController.swift in Sources */,
 				F51FC96A2143A823001F9009 /* AppDelegate.swift in Sources */,
-				F51FC9802143AD46001F9009 /* ChatService.swift in Sources */,
-				F51FC97E2143AC63001F9009 /* Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

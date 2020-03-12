@@ -1,22 +1,11 @@
-//
-//  ViewController.swift
-//  ScaledroneChatTest
-//
-//  Created by Marin Benčević on 08/09/2018.
-//  Copyright © 2018 Scaledrone. All rights reserved.
-//
-
 import UIKit
 import MessageKit
 import Hype
-import Scaledrone
 
 class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserver, HYPMessageObserver  {
     
-  var chatService: ChatService!
   var messages: [Message] = []
   var member: Member!
-  var communicator: Communicator!
   var resolvedInstance: HYPInstance!
   var instanceSearchController: UIAlertController!
   var didResolveController: UIAlertController!
@@ -24,22 +13,11 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
   
   override func viewDidLoad() {
     super.viewDidLoad()
-    member = Member(name: .randomName, color: .random)
     messagesCollectionView.messagesDataSource = self
     messagesCollectionView.messagesLayoutDelegate = self
     messageInputBar.delegate = self
     messagesCollectionView.messagesDisplayDelegate = self
-//    communicator = Communicator()
-//    communicator.requestHypeToStart()
-//    loadCustomViewIntoController()
     requestHypeToStart()
-    
-    chatService = ChatService(member: member, onRecievedMessage: {
-      [weak self] message in
-      self?.messages.append(message)
-      self?.messagesCollectionView.reloadData()
-      self?.messagesCollectionView.scrollToBottom(animated: true)
-    })
   }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -82,22 +60,11 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
     }
     
     func requestHypeToStart() {
-        
-        // Add self as an Hype observer
         HYP.add(self as HYPStateObserver)
         HYP.add(self as HYPNetworkObserver)
         HYP.add(self as HYPMessageObserver)
-        
-        //        HYP.setAnnouncement(self.announcement.data(using: .utf8))
-        
-        // Generate an app identifier in the HypeLabs dashboard (https://hypelabs.io/apps/),
-        // by creating a new app. Copy the given identifier here.
         HYP.setAppIdentifier("c990ae8f")
-        
         HYP.start()
-        
-        //        // Update the text label
-        //        self.updateHypeInstancesLabel()
     }
 
     func hypeDidStart() {
@@ -162,7 +129,6 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
         NSLog("Hype did receive %d %@", message.info.identifier, fromInstance.appStringIdentifier!)
         let msg = (NSString(data: (message?.data)!, encoding: String.Encoding.utf8.rawValue)! as String)
         NSLog("Hype msg recieved [%@]", msg)
-//        let msg = (NSString(data: (message?.data)!, encoding: String.Encoding.utf8.rawValue)! as String
         DispatchQueue.main.async {
             self.messages.append(Message(member: Member(name: "other", color: UIColor(displayP3Red: 1.0, green: 1.0, blue: 0.0, alpha: 1.0)), text: msg, messageId: "32"))
             self.messagesCollectionView.reloadData()
@@ -182,7 +148,7 @@ extension ViewController: MessagesDataSource {
   }
   
   func currentSender() -> Sender {
-    return Sender(id: member.name, displayName: member.name)
+    return Sender(id: "Bobby", displayName: "Bobby")
   }
   
   func messageForItem(at indexPath: IndexPath,
