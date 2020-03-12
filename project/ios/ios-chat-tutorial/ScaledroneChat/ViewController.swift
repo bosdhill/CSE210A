@@ -48,7 +48,8 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
     func showDidResolveDialog(title: String, message: String, instance: HYPInstance!) {
         if didResolveController == nil {
             didResolveController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            didResolveController.addAction(UIAlertAction(title: "OK", style: .cancel, handler: handleConfirmPressed(instance: instance)))
+            didResolveController.addAction(UIAlertAction(title: "OK", style: .default, handler: handleConfirmPressed(instance: instance)))
+            didResolveController.addAction(UIAlertAction(title: "CANCEL", style: .cancel, handler: nil))
             present(didResolveController, animated: true, completion: nil)
         }
     }
@@ -130,7 +131,7 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
         let msg = (NSString(data: (message?.data)!, encoding: String.Encoding.utf8.rawValue)! as String)
         NSLog("Hype msg recieved [%@]", msg)
         DispatchQueue.main.async {
-            self.messages.append(Message(member: Member(name: "other", color: UIColor(displayP3Red: 1.0, green: 1.0, blue: 0.0, alpha: 1.0)), text: msg, messageId: "32"))
+            self.messages.append(Message(member: Member(name: "Shlobby", color: UIColor(displayP3Red: 1.0, green: 1.0, blue: 0.0, alpha: 1.0)), text: msg, messageId: "32"))
             self.messagesCollectionView.reloadData()
             self.messagesCollectionView.scrollToBottom(animated: true)
         }

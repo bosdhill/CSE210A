@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        final ChatMessage chatMessage = new ChatMessage(message, new MemberData("other","red") , false);
+        final ChatMessage chatMessage = new ChatMessage(message, new MemberData("Bobby","red") , false);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

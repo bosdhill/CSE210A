@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
-//import com.hypelabs.hype.Message;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -54,8 +53,12 @@ public class ChatMessageAdapter extends BaseAdapter {
 
         if (message.isBelongsToCurrentUser()) {
             convertView = messageInflater.inflate(R.layout.my_message, null);
+//            holder.avatar = (View) convertView.findViewById(R.id.avatar);
+//            holder.name = (TextView) convertView.findViewById(R.id.name);
             holder.messageBody = (TextView) convertView.findViewById(R.id.message_body);
             convertView.setTag(holder);
+
+//            holder.name.setText(message.getMemberData().getName());
             try {
                 String text = new String(message.getMessage().getData(), "UTF-8");
                 holder.messageBody.setText(text);
