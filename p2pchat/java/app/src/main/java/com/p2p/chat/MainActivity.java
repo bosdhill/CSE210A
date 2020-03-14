@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
     private final String SENT_FAILED_TITLE = "Sending Failed";
     private final String SENT_TITLE = "Sending message...";
     private final String RECV_TITLE = "Delivered";
+    private final String FAILED_STARTING_TITLE = "Hype failed starting";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -227,8 +228,15 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
     @Override
     public void onHypeFailedStarting(Error error) {
         Log.i(TAG, String.format("Hype failed starting [%s]", error.toString()));
+        final Error err = error;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.show(MainActivity.this, null,
+                        FAILED_STARTING_TITLE, String.format("Error: [%s]", err.toString()));
+            }
+        });
     }
-
 
     @Override
     public void onHypeReady() {
@@ -284,7 +292,7 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
                         messagesView.setSelection(messagesView.getCount() - 1);
                     }
                 });
-             editText.getText().clear();
+                editText.getText().clear();
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }

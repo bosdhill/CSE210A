@@ -29,6 +29,7 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
     var SENT_FAILED_TITLE : String = "Sending Failed"
     var SENT_TITLE : String = "Sending message..."
     var RECV_TITLE : String = "Delivered"
+    var FAILED_STARTING_TITLE : String = "Hype failed starting"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -184,6 +185,10 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
 
     override fun onHypeFailedStarting(error: Error) {
         Log.i(TAG, String.format("Hype failed starting [%s]", error.toString()))
+        runOnUiThread {
+            dialog.show(this@MainActivity, null,
+                    FAILED_STARTING_TITLE, String.format("Error: [%s]", error.toString()));
+        }
     }
 
     override fun onHypeReady() {
