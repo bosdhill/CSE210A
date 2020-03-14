@@ -20,8 +20,16 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
     private var messageAdapter: ChatMessageAdapter? = null
     private var messagesView: ListView? = null
     private var resolvedInstance: Instance? = null
-//    private var dialog: AlertDialog? = null
     private var dialog: SingletonDialog = SingletonDialog()
+    var RESOLVED_INSTANCE_TITLE : String = "Hype new instance resolved"
+    var SEARCH_INSTANCE_TITLE : String = "Hype started..."
+    var SEARCH_INSTANCE_BODY : String = "Searching for instances"
+    var NO_INSTANCE_TITLE : String = "No resolved instance"
+    var NO_INSTANCE_BODY : String = "Would you like to search for an instance?"
+    var SENT_FAILED_TITLE : String = "Sending Failed"
+    var SENT_TITLE : String = "Sending message..."
+    var RECV_TITLE : String = "Delivered"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -89,16 +97,24 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
     override fun onHypeMessageFailedSending(messageInfo: MessageInfo, instance: Instance, error: Error) {
         Log.i(TAG, String.format("Hype message failed sending %s %s [%s]", messageInfo.identifier, instance.stringIdentifier, error.toString()))
         runOnUiThread {
-            dialog.showSentFailedDialog(this@MainActivity, instance)
+            dialog.show(this@MainActivity, null, SENT_FAILED_TITLE,
+                    String.format("Could not send to %s", instance.stringIdentifier))
         }
     }
 
     override fun onHypeMessageSent(messageInfo: MessageInfo, instance: Instance, v: Float, b: Boolean) {
         Log.i(TAG, String.format("Hype message sent %s %s [%f] %b", messageInfo.identifier, instance.stringIdentifier, v, b))
+        runOnUiThread {
+            dialog.show(this@MainActivity, null, SENT_TITLE, "")
+        }
     }
 
     override fun onHypeMessageDelivered(messageInfo: MessageInfo, instance: Instance, v: Float, b: Boolean) {
-        Log.i(TAG, String.format("Hype message delivered %s %s [%f] %b", messageInfo.identifier, instance.stringIdentifier, v, b))
+        Log.i(TAG, String.format("Hype message delivered %s %s [%f] %b", messageInfo.identifier,
+                instance.stringIdentifier, v, b))
+        runOnUiThread {
+            dialog.show(this@MainActivity, null, RECV_TITLE, "")
+        }
     }
 
     fun shouldResolveInstance(instance: Instance?): Boolean {
@@ -120,25 +136,29 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     override fun onHypeInstanceLost(instance: Instance, error: Error) {
-        Log.i(TAG, String.format("Hype lost instance: %s [%s]", instance.stringIdentifier, error.toString()))
+        Log.i(TAG, String.format("Hype lost instance: %s [%s]", instance.stringIdentifier,
+                error.toString()))
         // This instance is no longer available for communicating. If the instance
         // is somehow being tracked, such as by a map of instances, this would be
         // the proper time for cleanup.
         runOnUiThread {
-            dialog!!.showInstanceLostDialog(this@MainActivity, error.toString())
+            dialog.show(this@MainActivity, null,
+                    SEARCH_INSTANCE_TITLE, SEARCH_INSTANCE_BODY)
         }
     }
+
     override fun onHypeInstanceResolved(instance: Instance) {
         Log.i(TAG, String.format("Hype resolved instance: %s", instance.stringIdentifier))
         // At this point the instance is ready to communicate. Sending and receiving
         // content is possible at any time now.
+        var listener : DialogInterface.OnClickListener = DialogInterface.OnClickListener {
+            _, _ ->
+            Log.d(TAG, "Hype will communicate with instance")
+            this.resolvedInstance = instance
+        }
         runOnUiThread {
-            dialog.showResolveDialog(this@MainActivity, instance,
-                    DialogInterface.OnClickListener {
-                        dialogInterface, i ->
-                        Log.d(TAG, "Hype will communicate with instance")
-                        this.resolvedInstance = instance
-                    })
+            dialog.show(this@MainActivity, listener, RESOLVED_INSTANCE_TITLE,
+                    String.format("Instance found: %s\nDo you wish to communicate?", instance.stringIdentifier))
         }
     }
 
@@ -150,7 +170,8 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
     override fun onHypeStart() {
         Log.i(TAG, "Hype started")
         runOnUiThread {
-            dialog.showInstanceSearchDialog(this@MainActivity)
+            dialog.show(this@MainActivity, null,
+                    SEARCH_INSTANCE_TITLE, SEARCH_INSTANCE_BODY)
         }
     }
 
@@ -210,12 +231,14 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
                 e.printStackTrace()
             }
             catch (e: Exception) {
+                var listener : DialogInterface.OnClickListener = DialogInterface.OnClickListener {
+                    _, _ ->
+                    Log.i(TAG, "Hype no instance yes clicked")
+                    requestHypeToStart()
+                }
                 runOnUiThread {
-                    dialog.showNoInstanceDialog(this@MainActivity, DialogInterface.OnClickListener {
-                        dialogInterface, i ->
-                        Log.i(TAG, "Hype no instance yes clicked")
-                        requestHypeToStart()
-                    })
+                    dialog.show(this@MainActivity, listener, NO_INSTANCE_TITLE,
+                            NO_INSTANCE_BODY)
                 }
             }
         }
