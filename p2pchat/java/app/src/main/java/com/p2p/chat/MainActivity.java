@@ -30,7 +30,16 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
     private ListView messagesView;
     private Instance resolvedInstance;
     private boolean resolveDialogIsOpen = false;
-    private AlertDialog dialog;
+//    private AlertDialog dialog;
+    private SingletonDialog dialog = new SingletonDialog();
+    private final String RESOLVED_INSTANCE_TITLE = "Hype new instance resolved";
+    private final String SEARCH_INSTANCE_TITLE = "Hype started...";
+    private final String SEARCH_INSTANCE_BODY = "Searching for instances";
+    private final String NO_INSTANCE_TITLE = "No resolved instance";
+    private final String NO_INSTANCE_BODY = "Would you like to search for an instance?";
+    private final String SENT_FAILED_TITLE = "Sending Failed";
+    private final String SENT_TITLE = "Sending message...";
+    private final String RECV_TITLE = "Delivered";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,29 +111,6 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
         });
     }
 
-    public void showInstanceSearchDialog() {
-        final AlertDialog.Builder confirm = new AlertDialog.Builder(MainActivity.this)
-                .setTitle("Hype started...")
-                .setMessage("Looking for instances")
-                .setIcon(android.R.drawable.ic_dialog_alert);
-        dialog = confirm.create();
-        dialog.show();
-    }
-
-    public void showSentFailedDialog(Instance instance) {
-        final AlertDialog.Builder confirm = new AlertDialog.Builder(MainActivity.this)
-                .setTitle("Sending Failed")
-                .setMessage(String.format("Could not send to %s", instance.getStringIdentifier()))
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        Log.i(TAG, "Hype sent failed dialog clicked");
-                    }
-                })
-                .setIcon(android.R.drawable.ic_dialog_alert);
-        final AlertDialog dialog = confirm.create();
-        dialog.show();
-    }
-
     @Override
     public void onHypeMessageFailedSending(MessageInfo messageInfo, Instance instance, Error error) {
         Log.i(TAG, String.format("Hype message failed sending %s %s [%s]", messageInfo.getIdentifier(), instance.getStringIdentifier(),  error.toString()));
@@ -132,7 +118,8 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                showSentFailedDialog(inst);
+                dialog.show(MainActivity.this, null, SENT_FAILED_TITLE,
+                        String.format("Could not send to %s", inst.getStringIdentifier()));
             }
         });
     }
@@ -140,11 +127,23 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
     @Override
     public void onHypeMessageSent(MessageInfo messageInfo, Instance instance, float v, boolean b) {
         Log.i(TAG, String.format("Hype message sent %s %s [%f] %b", messageInfo.getIdentifier(), instance.getStringIdentifier(), v, b));
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.show(MainActivity.this, null, SENT_TITLE, "");
+            }
+        });
     }
 
     @Override
     public void onHypeMessageDelivered(MessageInfo messageInfo, Instance instance, float v, boolean b) {
         Log.i(TAG, String.format("Hype message delivered %s %s [%f] %b", messageInfo.getIdentifier(), instance.getStringIdentifier(), v, b));
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.show(MainActivity.this, null, RECV_TITLE, "");
+            }
+        });
     }
 
     boolean shouldResolveInstance(Instance instance) {
@@ -174,31 +173,10 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                showInstanceSearchDialog();
+                dialog.show(MainActivity.this, null,
+                        SEARCH_INSTANCE_TITLE, SEARCH_INSTANCE_BODY);
             }
         });
-    }
-
-    public void showResolveDialog(Instance instance) {
-        setResolveDialogIsOpen(true);
-        final AlertDialog.Builder confirm = new AlertDialog.Builder(MainActivity.this)
-                .setTitle("New Instance Resolved")
-                .setMessage(String.format("Instance found: %s\nDo you wish to communicate?", instance.getStringIdentifier()))
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        Log.d(TAG, "Hype will communicate with instance");
-                        setResolveDialogIsOpen(false);
-                    }
-                })
-                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        setResolveDialogIsOpen(false);
-                    }
-                })
-                .setIcon(android.R.drawable.ic_dialog_alert);
-        final AlertDialog dialog = confirm.create();
-        dialog.show();
     }
 
     @Override
@@ -206,18 +184,19 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
         Log.i(TAG, String.format("Hype resolved instance: %s", instance.getStringIdentifier()));
         // At this point the instance is ready to communicate. Sending and receiving
         // content is possible at any time now.
-        this.resolvedInstance = instance;
-        if (!isResolveDialogOpen()) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (dialog != null) {
-                        dialog.dismiss();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        resolvedInstance = instance;
                     }
-                    showResolveDialog(instance);
-                }
-            });
-        }
+                };
+                dialog.show(MainActivity.this, listener, RESOLVED_INSTANCE_TITLE,
+                        String.format("Instance found: %s\nDo you wish to communicate?", instance.getStringIdentifier()));
+            }
+        });
     }
 
     @Override
@@ -231,7 +210,8 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                showInstanceSearchDialog();
+                dialog.show(MainActivity.this, null,
+                        SEARCH_INSTANCE_TITLE, SEARCH_INSTANCE_BODY);
             }
         });
     }
@@ -309,6 +289,22 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
              editText.getText().clear();
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+            }
+            catch (Exception e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                Log.i(TAG, "Hype no instance yes clicked");
+                                requestHypeToStart();
+                            }
+                        };
+                        dialog.show(MainActivity.this, listener, NO_INSTANCE_TITLE,
+                                NO_INSTANCE_BODY);
+                    }
+                });
             }
         }
     }

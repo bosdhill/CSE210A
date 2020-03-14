@@ -8,7 +8,7 @@ class SingletonDialog {
     private var TAG = SingletonDialog::class.simpleName
     private var dialog : AlertDialog? = null
 
-    fun show(context: Context, onClickListener: DialogInterface.OnClickListener?, title: String, body: String) {
+    fun show(context: Context, listener: DialogInterface.OnClickListener?, title: String, body: String) {
         dialog?.let {
             dialog!!.dismiss()
             dialog = null
@@ -17,14 +17,8 @@ class SingletonDialog {
         val alert = AlertDialog.Builder(context)
                 .setTitle(title)
                 .setMessage(body)
-                .setPositiveButton(android.R.string.yes) { dialog, i ->
-                    onClickListener?.let {
-                        onClickListener.onClick(dialog, i)
-                    }
-                }
-                .setNegativeButton(android.R.string.no) { dialogInterface, i ->
-                    Log.i(TAG, String.format("[%s] dialog no clicked", title))
-                }
+                .setPositiveButton(android.R.string.yes, listener)
+                .setNegativeButton(android.R.string.no, null)
                 .setIcon(android.R.drawable.ic_dialog_alert)
         dialog = alert.create()
         dialog!!.show()
