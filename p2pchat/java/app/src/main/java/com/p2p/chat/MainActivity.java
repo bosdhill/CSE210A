@@ -29,8 +29,6 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
     private ChatMessageAdapter messageAdapter;
     private ListView messagesView;
     private Instance resolvedInstance;
-    private boolean resolveDialogIsOpen = false;
-//    private AlertDialog dialog;
     private SingletonDialog dialog = new SingletonDialog();
     private final String RESOLVED_INSTANCE_TITLE = "Hype new instance resolved";
     private final String SEARCH_INSTANCE_TITLE = "Hype started...";
@@ -307,14 +305,6 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
                 });
             }
         }
-    }
-
-    public boolean isResolveDialogOpen() {
-        return resolveDialogIsOpen;
-    }
-
-    public void setResolveDialogIsOpen(boolean resolveDialogIsOpen) {
-        this.resolveDialogIsOpen = resolveDialogIsOpen;
     }
 }
 
