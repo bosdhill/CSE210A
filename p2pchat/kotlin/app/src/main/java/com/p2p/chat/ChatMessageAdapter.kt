@@ -1,4 +1,4 @@
-package com.example.scaledrone.chat
+package com.p2p.chat
 
 import android.app.Activity
 import android.content.Context
@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
+import com.p2p.chat.R
 import java.io.UnsupportedEncodingException
 import java.util.*
 

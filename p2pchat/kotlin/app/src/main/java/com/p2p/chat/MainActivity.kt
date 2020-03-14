@@ -1,12 +1,16 @@
-package com.example.scaledrone.chat
+package com.p2p.chat
 
 import android.app.AlertDialog
+import android.content.DialogInterface
+import android.os.Build
 import android.os.Bundle
+import android.support.annotation.RequiresApi
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.ListView
+import com.p2p.chat.R
 import com.hypelabs.hype.*
 import java.io.UnsupportedEncodingException
 
@@ -16,8 +20,6 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
     private var messageAdapter: ChatMessageAdapter? = null
     private var messagesView: ListView? = null
     private var resolvedInstance: Instance? = null
-    var isResolveDialogOpen = false
-        private set
     private var dialog: AlertDialog? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,6 +85,17 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    fun showInstanceLostDialog(body: String) {
+        val confirm = AlertDialog.Builder(this@MainActivity)
+                .setTitle("Hype instance lost...")
+                .setMessage(body)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+        dialog = confirm.create()
+        dialog!!.show()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     fun showInstanceSearchDialog() {
         val confirm = AlertDialog.Builder(this@MainActivity)
                 .setTitle("Hype started...")
@@ -98,16 +111,37 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
                 .setMessage(String.format("Could not send to %s", instance.stringIdentifier))
                 .setPositiveButton(android.R.string.yes) { dialog, which ->
                     Log.i(TAG, "Hype sent failed dialog clicked")
-                    //                        setResolveDialogIsOpen(false);
                 }
                 .setIcon(android.R.drawable.ic_dialog_alert)
-        val dialog = confirm.create()
-        dialog.show()
+        dialog = confirm.create()
+        dialog!!.show()
+    }
+
+    fun showNoInstanceDialog() {
+        val confirm = AlertDialog.Builder(this@MainActivity)
+                .setTitle("No resolved instance")
+                .setMessage(String.format("Would you like to search for an instance?"))
+                .setPositiveButton(android.R.string.yes) { dialog, which ->
+                    Log.i(TAG, "Hype no instance yes clicked")
+                    requestHypeToStart()
+                }
+                .setNegativeButton(android.R.string.no) { dialog, which ->
+                    Log.i(TAG, "Hype no instance no clicked")
+                }
+                .setIcon(android.R.drawable.ic_dialog_alert)
+        dialog = confirm.create()
+        dialog!!.show()
     }
 
     override fun onHypeMessageFailedSending(messageInfo: MessageInfo, instance: Instance, error: Error) {
         Log.i(TAG, String.format("Hype message failed sending %s %s [%s]", messageInfo.identifier, instance.stringIdentifier, error.toString()))
-        runOnUiThread { showSentFailedDialog(instance) }
+        runOnUiThread {
+            dialog?.let {
+                dialog!!.dismiss()
+                dialog = null
+            }
+            showSentFailedDialog(instance)
+        }
     }
 
     override fun onHypeMessageSent(messageInfo: MessageInfo, instance: Instance, v: Float, b: Boolean) {
@@ -135,41 +169,47 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     override fun onHypeInstanceLost(instance: Instance, error: Error) {
         Log.i(TAG, String.format("Hype lost instance: %s [%s]", instance.stringIdentifier, error.toString()))
         // This instance is no longer available for communicating. If the instance
         // is somehow being tracked, such as by a map of instances, this would be
         // the proper time for cleanup.
-        runOnUiThread { showInstanceSearchDialog() }
+        runOnUiThread {
+            dialog?.let {
+                dialog!!.dismiss()
+                dialog = null
+            }
+            showInstanceLostDialog(error.toString())
+        }
     }
 
     fun showResolveDialog(instance: Instance) {
-        setResolveDialogIsOpen(true)
+        Log.i(TAG, "showResolveDialog")
         val confirm = AlertDialog.Builder(this@MainActivity)
                 .setTitle("New Instance Resolved")
                 .setMessage(String.format("Instance found: %s\nDo you wish to communicate?", instance.stringIdentifier))
                 .setPositiveButton(android.R.string.yes) { dialog, which ->
                     Log.d(TAG, "Hype will communicate with instance")
-                    setResolveDialogIsOpen(false)
+                    this.resolvedInstance = instance
                 }
-                .setNegativeButton(android.R.string.no) { dialogInterface, i -> setResolveDialogIsOpen(false) }
+                .setNegativeButton(android.R.string.no) { dialogInterface, i -> }
                 .setIcon(android.R.drawable.ic_dialog_alert)
-        val dialog = confirm.create()
-        dialog.show()
+        dialog = confirm.create()
+        dialog!!.show()
+        Log.i(TAG, "Hype show resolve dialog")
     }
 
     override fun onHypeInstanceResolved(instance: Instance) {
         Log.i(TAG, String.format("Hype resolved instance: %s", instance.stringIdentifier))
         // At this point the instance is ready to communicate. Sending and receiving
         // content is possible at any time now.
-        resolvedInstance = instance
-        if (!isResolveDialogOpen) {
-            runOnUiThread {
-                if (dialog != null) {
-                    dialog!!.dismiss()
-                }
-                showResolveDialog(instance)
+        runOnUiThread {
+            dialog?.let {
+                dialog!!.dismiss()
+                dialog = null
             }
+            showResolveDialog(instance)
         }
     }
 
@@ -177,17 +217,24 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
         Log.i(TAG, String.format("Hype could not resolve instance: %s [%s]", instance.stringIdentifier, error.toString()))
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     override fun onHypeStart() {
         Log.i(TAG, "Hype started")
-        runOnUiThread { showInstanceSearchDialog() }
+        // elvis operator
+        runOnUiThread {
+            dialog?.let {
+                dialog!!.dismiss()
+                dialog = null
+            }
+            showInstanceSearchDialog()
+        }
     }
 
     override fun onHypeStop(error: Error) {
-        if (error != null) {
+        error.let{
             Log.i(TAG, String.format("Hype stopped [%s]", error.toString()))
-        } else {
-            Log.i(TAG, "Hype stopped [null]. You should do reinstall the application.")
         }
+        Log.i(TAG, "Hype stopped [null]. You should do reinstall the application.")
     }
 
     override fun onHypeFailedStarting(error: Error) {
@@ -238,11 +285,14 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
             } catch (e: UnsupportedEncodingException) {
                 e.printStackTrace()
             }
+            catch (e: Exception) {
+                dialog?.let {
+                    dialog!!.dismiss()
+                    dialog = null
+                }
+                showNoInstanceDialog()
+            }
         }
-    }
-
-    fun setResolveDialogIsOpen(resolveDialogIsOpen: Boolean) {
-        isResolveDialogOpen = resolveDialogIsOpen
     }
 
 }
@@ -257,8 +307,6 @@ class MemberData {
         this.name = name
         this.color = color
     }
-
-    constructor() {}
 
     override fun toString(): String {
         return "MemberData{" +

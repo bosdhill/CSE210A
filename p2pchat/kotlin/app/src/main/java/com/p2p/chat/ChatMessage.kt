@@ -1,4 +1,4 @@
-package com.example.scaledrone.chat
+package com.p2p.chat
 
 import com.hypelabs.hype.Message
 
