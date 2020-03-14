@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: artifacts:Hype:unspecified@jar">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/Hype/build/.transforms/5fbc0550f19b781d5417c89cf63c53c7/Hype/jars/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/Hype/build/.transforms/5fbc0550f19b781d5417c89cf63c53c7/Hype/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
