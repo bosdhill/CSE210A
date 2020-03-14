@@ -20,7 +20,8 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
     private var messageAdapter: ChatMessageAdapter? = null
     private var messagesView: ListView? = null
     private var resolvedInstance: Instance? = null
-    private var dialog: AlertDialog? = null
+//    private var dialog: AlertDialog? = null
+    private var dialog: SingletonDialog = SingletonDialog()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -36,7 +37,7 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
         // The application context is used to query the user for permissions, such as using
         // the Bluetooth adapter or enabling Wi-Fi. The context must be set before anything
         // else is attempted, otherwise resulting in an exception being thrown.
-        Hype.setContext(applicationContext)
+        Hype.setContext(this@MainActivity)
 
         // Adding itself as an Hype state observer makes sure that the application gets
         // notifications for lifecycle events being triggered by the Hype SDK. These
@@ -85,62 +86,10 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    fun showInstanceLostDialog(body: String) {
-        val confirm = AlertDialog.Builder(this@MainActivity)
-                .setTitle("Hype instance lost...")
-                .setMessage(body)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-        dialog = confirm.create()
-        dialog!!.show()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    fun showInstanceSearchDialog() {
-        val confirm = AlertDialog.Builder(this@MainActivity)
-                .setTitle("Hype started...")
-                .setMessage("Looking for instances")
-                .setIcon(android.R.drawable.ic_dialog_alert)
-        dialog = confirm.create()
-        dialog!!.show()
-    }
-
-    fun showSentFailedDialog(instance: Instance) {
-        val confirm = AlertDialog.Builder(this@MainActivity)
-                .setTitle("Sending Failed")
-                .setMessage(String.format("Could not send to %s", instance.stringIdentifier))
-                .setPositiveButton(android.R.string.yes) { dialog, which ->
-                    Log.i(TAG, "Hype sent failed dialog clicked")
-                }
-                .setIcon(android.R.drawable.ic_dialog_alert)
-        dialog = confirm.create()
-        dialog!!.show()
-    }
-
-    fun showNoInstanceDialog() {
-        val confirm = AlertDialog.Builder(this@MainActivity)
-                .setTitle("No resolved instance")
-                .setMessage(String.format("Would you like to search for an instance?"))
-                .setPositiveButton(android.R.string.yes) { dialog, which ->
-                    Log.i(TAG, "Hype no instance yes clicked")
-                    requestHypeToStart()
-                }
-                .setNegativeButton(android.R.string.no) { dialog, which ->
-                    Log.i(TAG, "Hype no instance no clicked")
-                }
-                .setIcon(android.R.drawable.ic_dialog_alert)
-        dialog = confirm.create()
-        dialog!!.show()
-    }
-
     override fun onHypeMessageFailedSending(messageInfo: MessageInfo, instance: Instance, error: Error) {
         Log.i(TAG, String.format("Hype message failed sending %s %s [%s]", messageInfo.identifier, instance.stringIdentifier, error.toString()))
         runOnUiThread {
-            dialog?.let {
-                dialog!!.dismiss()
-                dialog = null
-            }
-            showSentFailedDialog(instance)
+            dialog.showSentFailedDialog(this@MainActivity, instance)
         }
     }
 
@@ -176,40 +125,20 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
         // is somehow being tracked, such as by a map of instances, this would be
         // the proper time for cleanup.
         runOnUiThread {
-            dialog?.let {
-                dialog!!.dismiss()
-                dialog = null
-            }
-            showInstanceLostDialog(error.toString())
+            dialog!!.showInstanceLostDialog(this@MainActivity, error.toString())
         }
     }
-
-    fun showResolveDialog(instance: Instance) {
-        Log.i(TAG, "showResolveDialog")
-        val confirm = AlertDialog.Builder(this@MainActivity)
-                .setTitle("New Instance Resolved")
-                .setMessage(String.format("Instance found: %s\nDo you wish to communicate?", instance.stringIdentifier))
-                .setPositiveButton(android.R.string.yes) { dialog, which ->
-                    Log.d(TAG, "Hype will communicate with instance")
-                    this.resolvedInstance = instance
-                }
-                .setNegativeButton(android.R.string.no) { dialogInterface, i -> }
-                .setIcon(android.R.drawable.ic_dialog_alert)
-        dialog = confirm.create()
-        dialog!!.show()
-        Log.i(TAG, "Hype show resolve dialog")
-    }
-
     override fun onHypeInstanceResolved(instance: Instance) {
         Log.i(TAG, String.format("Hype resolved instance: %s", instance.stringIdentifier))
         // At this point the instance is ready to communicate. Sending and receiving
         // content is possible at any time now.
         runOnUiThread {
-            dialog?.let {
-                dialog!!.dismiss()
-                dialog = null
-            }
-            showResolveDialog(instance)
+            dialog.showResolveDialog(this@MainActivity, instance,
+                    DialogInterface.OnClickListener {
+                        dialogInterface, i ->
+                        Log.d(TAG, "Hype will communicate with instance")
+                        this.resolvedInstance = instance
+                    })
         }
     }
 
@@ -220,13 +149,8 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     override fun onHypeStart() {
         Log.i(TAG, "Hype started")
-        // elvis operator
         runOnUiThread {
-            dialog?.let {
-                dialog!!.dismiss()
-                dialog = null
-            }
-            showInstanceSearchDialog()
+            dialog.showInstanceSearchDialog(this@MainActivity)
         }
     }
 
@@ -286,11 +210,13 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
                 e.printStackTrace()
             }
             catch (e: Exception) {
-                dialog?.let {
-                    dialog!!.dismiss()
-                    dialog = null
+                runOnUiThread {
+                    dialog.showNoInstanceDialog(this@MainActivity, DialogInterface.OnClickListener {
+                        dialogInterface, i ->
+                        Log.i(TAG, "Hype no instance yes clicked")
+                        requestHypeToStart()
+                    })
                 }
-                showNoInstanceDialog()
             }
         }
     }
