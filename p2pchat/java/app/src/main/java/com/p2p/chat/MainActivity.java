@@ -169,6 +169,7 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
         // This instance is no longer available for communicating. If the instance
         // is somehow being tracked, such as by a map of instances, this would be
         // the proper time for cleanup.
+        resolvedInstance = null;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

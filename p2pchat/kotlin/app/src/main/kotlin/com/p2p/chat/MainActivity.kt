@@ -142,6 +142,7 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
         // This instance is no longer available for communicating. If the instance
         // is somehow being tracked, such as by a map of instances, this would be
         // the proper time for cleanup.
+        resolvedInstance = null
         runOnUiThread {
             dialog.show(this@MainActivity, null,
                     SEARCH_INSTANCE_TITLE, SEARCH_INSTANCE_BODY)

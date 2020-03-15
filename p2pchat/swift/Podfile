@@ -1,11 +1,10 @@
 # Uncomment the next line to define a global platform for your project
 # platform :ios, '9.0'
 
-target 'ScaledroneChat' do
+target 'p2pchat' do
   # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
   use_frameworks!
 
-  # Pods for ScaledroneChat
+  # Pods for p2pchat
 pod 'MessageKit'
-pod 'Scaledrone', '~> 0.3.0'
 end
