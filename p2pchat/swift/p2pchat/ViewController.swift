@@ -226,7 +226,7 @@ extension ViewController: MessageInputBarDelegate {
                              animated: self.ANIMATED, completion: nil)
             }
             HYP.send(data, to: self.resolvedInstance, trackProgress: true)
-            messageCallback(message: chatMessage)
+            showMessage(message: chatMessage)
         }
         else {
             DispatchQueue.main.async {
@@ -236,7 +236,7 @@ extension ViewController: MessageInputBarDelegate {
         }
     }
     
-    func messageCallback(message: Message) {
+    func showMessage(message: Message) {
         DispatchQueue.main.async {
             self.messages.append(message)
             self.messagesCollectionView.reloadData()
