@@ -8,7 +8,7 @@ class Dialog {
     private var TAG = Dialog::class.simpleName
     private var dialog : AlertDialog? = null
 
-    fun show(context: Context, listener: DialogInterface.OnClickListener?, title: String, body: String) {
+    fun show(context: Context, listener: DialogInterface.OnClickListener?, title: String, body: String, canceleable: Boolean) {
         dialog?.let {
             dialog!!.dismiss()
             dialog = null
@@ -17,9 +17,15 @@ class Dialog {
         val alert = AlertDialog.Builder(context)
                 .setTitle(title)
                 .setMessage(body)
-                .setPositiveButton(android.R.string.yes, listener)
-                .setNegativeButton(android.R.string.no, null)
                 .setIcon(android.R.drawable.ic_dialog_alert)
+                .setCancelable(canceleable)
+        listener?.let {
+            alert.setPositiveButton(android.R.string.yes, listener)
+                 .setNegativeButton(android.R.string.no, null)
+        }
+        if (canceleable) {
+            alert.setPositiveButton(android.R.string.yes, null)
+        }
         dialog = alert.create()
         dialog!!.show()
     }

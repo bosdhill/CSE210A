@@ -20,16 +20,18 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
     private var messageAdapter: ChatMessageAdapter? = null
     private var messagesView: ListView? = null
     private var resolvedInstance: Instance? = null
-    private var dialog: SingletonDialog = SingletonDialog()
-    var RESOLVED_INSTANCE_TITLE : String = "Hype new instance resolved"
-    var SEARCH_INSTANCE_TITLE : String = "Hype started..."
-    var SEARCH_INSTANCE_BODY : String = "Searching for instances"
-    var NO_INSTANCE_TITLE : String = "No resolved instance"
-    var NO_INSTANCE_BODY : String = "Would you like to search for an instance?"
-    var SENT_FAILED_TITLE : String = "Sending Failed"
-    var SENT_TITLE : String = "Sending message..."
-    var RECV_TITLE : String = "Delivered"
-    var FAILED_STARTING_TITLE : String = "Hype failed starting"
+    private var sentMessage: ChatMessage? = null
+    private var dialog: Dialog = Dialog()
+    private var RESOLVED_INSTANCE_TITLE : String = "Hype new instance resolved"
+    private var SEARCH_INSTANCE_TITLE : String = "Hype started..."
+    private var SEARCH_INSTANCE_BODY : String = "Searching for instances"
+    private var NO_INSTANCE_TITLE : String = "No resolved instance"
+    private var NO_INSTANCE_BODY : String = "Would you like to search for an instance?"
+    private var SENT_FAILED_TITLE : String = "Sending Failed"
+    private var SENT_TITLE : String = "Sending message..."
+    private var RECV_TITLE : String = "Delivered"
+    private var FAILED_STARTING_TITLE : String = "Hype failed starting"
+    private val LOST_INSTANCE_TITLE : String = "Hype instance lost"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,6 +80,13 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
         Hype.start()
     }
 
+    fun displayMessage(message: ChatMessage?) {
+        message?.let {
+            messageAdapter!!.add(message!!)
+            messagesView!!.setSelection(messagesView!!.count - 1)
+        }
+    }
+
     override fun onHypeMessageReceived(message: com.hypelabs.hype.Message, instance: Instance) {
         Log.i(TAG, String.format("Hype message received %s %s", message.identifier, instance.stringIdentifier))
         var text: String? = null
@@ -88,25 +97,24 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
         } catch (e: UnsupportedEncodingException) {
             e.printStackTrace()
         }
-        val chatMessage = ChatMessage(message, MemberData("other", "red"), false)
+        val chatMessage = ChatMessage(message, MemberData("Bobby", "red"), false)
         runOnUiThread {
-            messageAdapter!!.add(chatMessage)
-            messagesView!!.setSelection(messagesView!!.count - 1)
+            displayMessage(chatMessage)
         }
     }
 
     override fun onHypeMessageFailedSending(messageInfo: MessageInfo, instance: Instance, error: Error) {
         Log.i(TAG, String.format("Hype message failed sending %s %s [%s]", messageInfo.identifier, instance.stringIdentifier, error.toString()))
         runOnUiThread {
-            dialog.show(this@MainActivity, null, SENT_FAILED_TITLE,
-                    String.format("Could not send to %s", instance.stringIdentifier))
+            dialog.show(this@MainActivity, findNewInstance(), SENT_FAILED_TITLE,
+                    String.format("Could not send to %s.\n" + NO_INSTANCE_BODY, instance.stringIdentifier), false)
         }
     }
 
     override fun onHypeMessageSent(messageInfo: MessageInfo, instance: Instance, v: Float, b: Boolean) {
         Log.i(TAG, String.format("Hype message sent %s %s [%f] %b", messageInfo.identifier, instance.stringIdentifier, v, b))
         runOnUiThread {
-            dialog.show(this@MainActivity, null, SENT_TITLE, "")
+            dialog.show(this@MainActivity, null, SENT_TITLE, "", false)
         }
     }
 
@@ -114,7 +122,8 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
         Log.i(TAG, String.format("Hype message delivered %s %s [%f] %b", messageInfo.identifier,
                 instance.stringIdentifier, v, b))
         runOnUiThread {
-            dialog.show(this@MainActivity, null, RECV_TITLE, "")
+            dialog.show(this@MainActivity, null, RECV_TITLE, "", true)
+            displayMessage(sentMessage)
         }
     }
 
@@ -135,6 +144,15 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
         }
     }
 
+    fun findNewInstance(): DialogInterface.OnClickListener {
+        var listener : DialogInterface.OnClickListener = DialogInterface.OnClickListener {
+            _, _ ->
+            Log.i(TAG, "Hype no instance yes clicked")
+            requestHypeToStart()
+        }
+        return listener
+    }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     override fun onHypeInstanceLost(instance: Instance, error: Error) {
         Log.i(TAG, String.format("Hype lost instance: %s [%s]", instance.stringIdentifier,
@@ -144,23 +162,27 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
         // the proper time for cleanup.
         resolvedInstance = null
         runOnUiThread {
-            dialog.show(this@MainActivity, null,
-                    SEARCH_INSTANCE_TITLE, SEARCH_INSTANCE_BODY)
+            dialog.show(this@MainActivity, findNewInstance()!!,
+                    LOST_INSTANCE_TITLE, SEARCH_INSTANCE_BODY, false)
         }
+    }
+
+    fun setNewInstance(instance: Instance): DialogInterface.OnClickListener {
+        var listener : DialogInterface.OnClickListener = DialogInterface.OnClickListener {
+            _, _ ->
+            Log.d(TAG, "Hype will communicate with instance")
+            this.resolvedInstance = instance
+        }
+        return listener
     }
 
     override fun onHypeInstanceResolved(instance: Instance) {
         Log.i(TAG, String.format("Hype resolved instance: %s", instance.stringIdentifier))
         // At this point the instance is ready to communicate. Sending and receiving
         // content is possible at any time now.
-        var listener : DialogInterface.OnClickListener = DialogInterface.OnClickListener {
-            _, _ ->
-            Log.d(TAG, "Hype will communicate with instance")
-            this.resolvedInstance = instance
-        }
         runOnUiThread {
-            dialog.show(this@MainActivity, listener, RESOLVED_INSTANCE_TITLE,
-                    String.format("Instance found: %s\nDo you wish to communicate?", instance.stringIdentifier))
+            dialog.show(this@MainActivity, setNewInstance(instance), RESOLVED_INSTANCE_TITLE,
+                    String.format("Instance found: %s\nDo you wish to communicate?", instance.stringIdentifier, false), false)
         }
     }
 
@@ -173,7 +195,7 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
         Log.i(TAG, "Hype started")
         runOnUiThread {
             dialog.show(this@MainActivity, null,
-                    SEARCH_INSTANCE_TITLE, SEARCH_INSTANCE_BODY)
+                    SEARCH_INSTANCE_TITLE, SEARCH_INSTANCE_BODY, false)
         }
     }
 
@@ -188,7 +210,7 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
         Log.i(TAG, String.format("Hype failed starting [%s]", error.toString()))
         runOnUiThread {
             dialog.show(this@MainActivity, null,
-                    FAILED_STARTING_TITLE, String.format("Error: [%s]", error.toString()));
+                    FAILED_STARTING_TITLE, String.format("Error: [%s]", error.toString()), true);
         }
     }
 
@@ -225,26 +247,16 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
         if (message.length > 0) {
             val sentMessage: com.hypelabs.hype.Message
             try {
-                sentMessage = sendMessage(message, resolvedInstance, true)
-                val mData = MemberData("Bobby", "")
-                val m = ChatMessage(sentMessage, mData, true)
-                runOnUiThread {
-                    messageAdapter!!.add(m)
-                    messagesView!!.setSelection(messagesView!!.count - 1)
-                }
+                var m = sendMessage(message, resolvedInstance, true)
+                this.sentMessage = ChatMessage(m, MemberData("Bobby", ""), true)
                 editText!!.text.clear()
             } catch (e: UnsupportedEncodingException) {
                 e.printStackTrace()
             }
             catch (e: Exception) {
-                var listener : DialogInterface.OnClickListener = DialogInterface.OnClickListener {
-                    _, _ ->
-                    Log.i(TAG, "Hype no instance yes clicked")
-                    requestHypeToStart()
-                }
                 runOnUiThread {
-                    dialog.show(this@MainActivity, listener, NO_INSTANCE_TITLE,
-                            NO_INSTANCE_BODY)
+                    dialog.show(this@MainActivity, findNewInstance(), NO_INSTANCE_TITLE,
+                            NO_INSTANCE_BODY, false)
                 }
             }
         }

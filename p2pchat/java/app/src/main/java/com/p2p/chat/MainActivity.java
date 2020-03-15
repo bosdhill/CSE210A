@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
     private ChatMessageAdapter messageAdapter;
     private ListView messagesView;
     private Instance resolvedInstance;
+    private ChatMessage sentMessage;
     private Dialog dialog = new Dialog();
     private final String RESOLVED_INSTANCE_TITLE = "Hype new instance resolved";
     private final String SEARCH_INSTANCE_TITLE = "Hype started...";
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
     private final String SENT_TITLE = "Sending message...";
     private final String RECV_TITLE = "Delivered";
     private final String FAILED_STARTING_TITLE = "Hype failed starting";
+    private final String LOST_INSTANCE_TITLE = "Hype instance lost";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +89,13 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
         Hype.start();
     }
 
+    private void displayMessage(ChatMessage message) {
+        if (message != null) {
+            messageAdapter.add(message);
+            messagesView.setSelection(messagesView.getCount() - 1);
+        }
+    }
+
     @Override
     public void onHypeMessageReceived(Message message, Instance instance) {
         Log.i(TAG, String.format("Hype message received %s %s", message.getIdentifier(), instance.getStringIdentifier()));
@@ -102,8 +111,7 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                messageAdapter.add(chatMessage);
-                messagesView.setSelection(messagesView.getCount() - 1);
+                displayMessage(chatMessage);
             }
         });
     }
@@ -115,8 +123,8 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                dialog.show(MainActivity.this, null, SENT_FAILED_TITLE,
-                        String.format("Could not send to %s", inst.getStringIdentifier()));
+                dialog.show(MainActivity.this, findNewInstance(), SENT_FAILED_TITLE,
+                        String.format("Could not send to %s.\n" + NO_INSTANCE_BODY, inst.getStringIdentifier()), false);
             }
         });
     }
@@ -127,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                dialog.show(MainActivity.this, null, SENT_TITLE, "");
+                dialog.show(MainActivity.this, null, SENT_TITLE, "", false);
             }
         });
     }
@@ -138,7 +146,8 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                dialog.show(MainActivity.this, null, RECV_TITLE, "");
+                dialog.show(MainActivity.this, null, RECV_TITLE, "", true);
+                displayMessage(sentMessage);
             }
         });
     }
@@ -161,6 +170,17 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
         }
     }
 
+    private DialogInterface.OnClickListener findNewInstance() {
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Log.i(TAG, "Hype no instance yes clicked");
+                requestHypeToStart();
+            }
+        };
+        return listener;
+    }
+
     @Override
     public void onHypeInstanceLost(Instance instance, Error error) {
         Log.i(TAG, String.format("Hype lost instance: %s [%s]", instance.getStringIdentifier(), error.toString()));
@@ -171,10 +191,20 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                dialog.show(MainActivity.this, null,
-                        SEARCH_INSTANCE_TITLE, SEARCH_INSTANCE_BODY);
+                dialog.show(MainActivity.this, findNewInstance(),
+                        LOST_INSTANCE_TITLE, NO_INSTANCE_BODY, false);
             }
         });
+    }
+
+    private DialogInterface.OnClickListener setNewInstance(final Instance instance) {
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                resolvedInstance = instance;
+            }
+        };
+        return listener;
     }
 
     @Override
@@ -185,14 +215,8 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        resolvedInstance = instance;
-                    }
-                };
-                dialog.show(MainActivity.this, listener, RESOLVED_INSTANCE_TITLE,
-                        String.format("Instance found: %s\nDo you wish to communicate?", instance.getStringIdentifier()));
+            dialog.show(MainActivity.this, setNewInstance(instance), RESOLVED_INSTANCE_TITLE,
+                    String.format("Instance found: %s\nDo you wish to communicate?", instance.getStringIdentifier()), false);
             }
         });
     }
@@ -209,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
             @Override
             public void run() {
                 dialog.show(MainActivity.this, null,
-                        SEARCH_INSTANCE_TITLE, SEARCH_INSTANCE_BODY);
+                        SEARCH_INSTANCE_TITLE, SEARCH_INSTANCE_BODY, false);
             }
         });
     }
@@ -232,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
             @Override
             public void run() {
                 dialog.show(MainActivity.this, null,
-                        FAILED_STARTING_TITLE, String.format("Error: [%s]", err.toString()));
+                        FAILED_STARTING_TITLE, String.format("Error: [%s]", err.toString()), true);
             }
         });
     }
@@ -279,19 +303,10 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
         System.out.println("sendMessage");
         String message = editText.getText().toString();
         if (message.length() > 0) {
-            Message sentMessage;
             try {
-             sentMessage = sendMessage(message, resolvedInstance, true);
-             final MemberData mData = new MemberData("Bobby", "");
-             final ChatMessage m = new ChatMessage(sentMessage, mData, true);
-             runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        messageAdapter.add(m);
-                        messagesView.setSelection(messagesView.getCount() - 1);
-                    }
-                });
-                editText.getText().clear();
+             Message m = sendMessage(message, resolvedInstance, true);
+             sentMessage = new ChatMessage(m, new MemberData("Bobby", ""), true);
+             editText.getText().clear();
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
@@ -299,15 +314,8 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                Log.i(TAG, "Hype no instance yes clicked");
-                                requestHypeToStart();
-                            }
-                        };
-                        dialog.show(MainActivity.this, listener, NO_INSTANCE_TITLE,
-                                NO_INSTANCE_BODY);
+                    dialog.show(MainActivity.this, findNewInstance(), NO_INSTANCE_TITLE,
+                            NO_INSTANCE_BODY, false);
                     }
                 });
             }

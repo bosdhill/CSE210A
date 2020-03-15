@@ -8,7 +8,8 @@ public class Dialog {
     private String TAG = Dialog.class.getName();
     private AlertDialog dialog;
 
-    public void show(Context context, DialogInterface.OnClickListener listener, String title, String body) {
+    public void show(Context context, DialogInterface.OnClickListener listener, String title,
+                     String body, boolean cancelable) {
         if (dialog != null) {
             dialog.dismiss();
             dialog = null;
@@ -18,8 +19,14 @@ public class Dialog {
                 .setTitle(title)
                 .setMessage(body)
                 .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(android.R.string.yes, listener)
-                .setNegativeButton(android.R.string.no, null);
+                .setCancelable(cancelable);
+        if (listener != null) {
+            alert.setPositiveButton(android.R.string.yes, listener)
+                 .setNegativeButton(android.R.string.no, null);
+        }
+        if (cancelable) {
+            alert.setPositiveButton(android.R.string.yes, null);
+        }
         dialog = alert.create();
         dialog.show();
     }
