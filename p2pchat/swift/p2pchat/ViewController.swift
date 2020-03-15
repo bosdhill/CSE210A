@@ -10,6 +10,7 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
     var instanceSearchController: UIAlertController!
     var didResolveController: UIAlertController!
     var dialog: Dialog = Dialog()
+    var sentMessage: Message!
     var RESOLVED_INSTANCE_TITLE: String = "Hype new instance resolved"
     var SEARCH_INSTANCE_TITLE: String = "Hype started..."
     var SEARCH_INSTANCE_BODY: String = "Searching for instances"
@@ -19,6 +20,7 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
     var SENT_TITLE: String = "Sending message..."
     var RECV_TITLE: String = "Delivered"
     var FAILED_STARTING_TITLE: String = "Hype failed starting"
+    var LOST_INSTANCE_TITLE: String = "Hype instance lost"
     var ANIMATED: Bool = false
     
     override func viewDidLoad() {
@@ -90,17 +92,21 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
         NSLog("Hype did find instance %@", instance.appStringIdentifier!)
     }
     
+    func noInstanceHandler(_ alertAction:UIAlertAction) -> () {
+        NSLog("Hype no instance yes clicked")
+        return self.requestHypeToStart()
+    }
+    
     func hypeDidLose(_ instance: HYPInstance!, error: HYPError!) {
         NSLog("Hype did lost instance %@ [%s]", instance.appStringIdentifier!, error.description)
-        let message = String(format: "Lost instance: %@", instance.appStringIdentifier!)
+        let message = String(format: "Lost instance: %@\n" + self.NO_INSTANCE_BODY, instance.appStringIdentifier!)
         resolvedInstance = nil
         DispatchQueue.main.async {
-            self.present(self.dialog.show(title: self.NO_INSTANCE_TITLE, message: message, handler: nil),
-                         animated: true, completion: nil)
+            self.present(self.dialog.show(title: self.NO_INSTANCE_TITLE, message: message, handler: self.noInstanceHandler),
+                         animated: self.ANIMATED, completion: nil)
         }
     }
     
-    // example of closure in Swift
     func resolveHandler(instance: HYPInstance!) -> (_ alertAction:UIAlertAction) -> () {
         return {_ in
             self.resolvedInstance = instance
@@ -126,10 +132,8 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
         let msg = (NSString(data: (message?.data)!, encoding: String.Encoding.utf8.rawValue)! as String)
         NSLog("Hype msg recieved [%@]", msg)
         DispatchQueue.main.async {
-            self.messages.append(Message(member: Member(name: "Shlobby", color:
+            self.showMessage(message: Message(member: Member(name: "Shlobby", color:
                 UIColor(displayP3Red: 1.0, green: 1.0, blue: 0.0, alpha: 1.0)), text: msg, messageId: "32"))
-            self.messagesCollectionView.reloadData()
-            self.messagesCollectionView.scrollToBottom(animated: true)
         }
     }
     
@@ -141,11 +145,20 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
         }
     }
     
+    func showMessage(message: Message) {
+        self.messages.append(message)
+        self.messagesCollectionView.reloadData()
+        self.messagesCollectionView.scrollToBottom(animated: true)
+    }
+    
+    func noop(_: Any) {}
+    
     func hypeDidDeliverMessage(_ messageInfo: HYPMessageInfo!, to toInstance: HYPInstance!, progress: Float, complete: Bool) {
         if complete {
             NSLog("Hype delivered message %d %@ %f", messageInfo.identifier, toInstance.appStringIdentifier!, progress)
             DispatchQueue.main.async {
-                self.present(self.dialog.show(title: self.RECV_TITLE, message: "", handler: nil), animated: self.ANIMATED, completion: nil)
+                self.present(self.dialog.show(title: self.RECV_TITLE, message: "", handler: self.noop), animated: self.ANIMATED, completion: nil)
+                self.showMessage(message: self.sentMessage)
             }
         }
     }
@@ -205,11 +218,6 @@ extension ViewController: MessageInputBarDelegate {
         inputBar.inputTextView.text = ""
     }
     
-    func noInstanceHandler(_ alertAction:UIAlertAction) -> () {
-        NSLog("Hype no instance yes clicked")
-        return self.requestHypeToStart()
-    }
-    
     func sendMessage(text: String) {
         let col = UIColor(displayP3Red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
         let m = Member(name: "Bobby", color: col)
@@ -226,7 +234,7 @@ extension ViewController: MessageInputBarDelegate {
                              animated: self.ANIMATED, completion: nil)
             }
             HYP.send(data, to: self.resolvedInstance, trackProgress: true)
-            showMessage(message: chatMessage)
+            sentMessage = chatMessage
         }
         else {
             DispatchQueue.main.async {
@@ -235,13 +243,4 @@ extension ViewController: MessageInputBarDelegate {
             }
         }
     }
-    
-    func showMessage(message: Message) {
-        DispatchQueue.main.async {
-            self.messages.append(message)
-            self.messagesCollectionView.reloadData()
-            self.messagesCollectionView.scrollToBottom(animated: true)
-        }
-    }
 }
-

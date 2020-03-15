@@ -10,8 +10,10 @@ class Dialog: NSObject {
         }
         NSLog("show")
         dialog = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        dialog.addAction(UIAlertAction(title: "OK", style: .default, handler: handler))
-        dialog.addAction(UIAlertAction(title: "CANCEL", style: .cancel, handler: nil))
+        if handler != nil {
+            dialog.addAction(UIAlertAction(title: "OK", style: .default, handler: handler))
+            dialog.addAction(UIAlertAction(title: "CANCEL", style: .cancel, handler: nil))
+        }
         return dialog
     }
 }
