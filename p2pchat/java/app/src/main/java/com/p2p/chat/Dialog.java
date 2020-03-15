@@ -4,8 +4,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.util.Log;
 
-public class SingletonDialog {
-    private String TAG = SingletonDialog.class.getName();
+public class Dialog {
+    private String TAG = Dialog.class.getName();
     private AlertDialog dialog;
 
     public void show(Context context, DialogInterface.OnClickListener listener, String title, String body) {

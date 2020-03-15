@@ -1,6 +1,5 @@
 package com.p2p.chat;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,7 +9,6 @@ import android.widget.ListView;
 
 import android.util.Log;
 
-import com.p2p.chat.R;
 import com.hypelabs.hype.Error;
 import com.hypelabs.hype.Hype;
 import com.hypelabs.hype.Instance;
@@ -29,7 +27,7 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
     private ChatMessageAdapter messageAdapter;
     private ListView messagesView;
     private Instance resolvedInstance;
-    private SingletonDialog dialog = new SingletonDialog();
+    private Dialog dialog = new Dialog();
     private final String RESOLVED_INSTANCE_TITLE = "Hype new instance resolved";
     private final String SEARCH_INSTANCE_TITLE = "Hype started...";
     private final String SEARCH_INSTANCE_BODY = "Searching for instances";

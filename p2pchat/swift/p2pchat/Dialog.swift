@@ -1,6 +1,6 @@
 import UIKit
 
-class SingletonDialog: NSObject {
+class Dialog: NSObject {
     var dialog: UIAlertController!
     
     func show(title: String, message: String, handler: ((UIAlertAction) -> Void)?) -> UIAlertController {

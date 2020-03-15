@@ -9,8 +9,8 @@
 /* Begin PBXBuildFile section */
 		3BD6B23DDC53C21E88612791 /* Pods_p2pchat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 082CBBE5F5A8D8EF116B16E4 /* Pods_p2pchat.framework */; };
 		DF26222B240B590300174058 /* Hype.framework in Embed Libraries */ = {isa = PBXBuildFile; fileRef = DF262229240B590300174058 /* Hype.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		DF578222241DA33A0073916F /* SingletonDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF578221241DA33A0073916F /* SingletonDialog.swift */; };
 		DF5868D5241A1BF8000040BB /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF5868D4241A1BF7000040BB /* Message.swift */; };
+		DF93BAAB241DC7DF002FA332 /* Dialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF93BAAA241DC7DF002FA332 /* Dialog.swift */; };
 		DF949E03240B5549009B2055 /* Hype.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DF949E02240B5549009B2055 /* Hype.framework */; };
 		F51FC96A2143A823001F9009 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51FC9692143A823001F9009 /* AppDelegate.swift */; };
 		F51FC96C2143A823001F9009 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51FC96B2143A823001F9009 /* ViewController.swift */; };
@@ -40,8 +40,8 @@
 		6F129B3DA0100A4D961A4F53 /* Pods_p2pchatTest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_p2pchatTest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9EDD2FBD26B14939767C3E1A /* Pods-p2pchatTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-p2pchatTest.debug.xcconfig"; path = "Pods/Target Support Files/Pods-p2pchatTest/Pods-p2pchatTest.debug.xcconfig"; sourceTree = "<group>"; };
 		DF262229240B590300174058 /* Hype.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Hype.framework; path = Hype/Hype.framework; sourceTree = "<group>"; };
-		DF578221241DA33A0073916F /* SingletonDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingletonDialog.swift; sourceTree = "<group>"; };
 		DF5868D4241A1BF7000040BB /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		DF93BAAA241DC7DF002FA332 /* Dialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dialog.swift; sourceTree = "<group>"; };
 		DF949DFF240B51C0009B2055 /* Hype */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Hype; path = ../../../../../hype/HypeiOS/Hype.framework/Hype; sourceTree = "<group>"; };
 		DF949E02240B5549009B2055 /* Hype.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Hype.framework; path = ../../../../../hype/HypeiOS/Hype.framework; sourceTree = "<group>"; };
 		E0DC8D108C38EC38D898977F /* Pods-p2pchatTest.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-p2pchatTest.release.xcconfig"; path = "Pods/Target Support Files/Pods-p2pchatTest/Pods-p2pchatTest.release.xcconfig"; sourceTree = "<group>"; };
@@ -118,7 +118,7 @@
 				F51FC9722143A824001F9009 /* LaunchScreen.storyboard */,
 				F51FC9752143A824001F9009 /* Info.plist */,
 				DF5868D4241A1BF7000040BB /* Message.swift */,
-				DF578221241DA33A0073916F /* SingletonDialog.swift */,
+				DF93BAAA241DC7DF002FA332 /* Dialog.swift */,
 			);
 			path = p2pchat;
 			sourceTree = "<group>";
@@ -236,9 +236,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				DF5868D5241A1BF8000040BB /* Message.swift in Sources */,
+				DF93BAAB241DC7DF002FA332 /* Dialog.swift in Sources */,
 				F51FC96C2143A823001F9009 /* ViewController.swift in Sources */,
 				F51FC96A2143A823001F9009 /* AppDelegate.swift in Sources */,
-				DF578222241DA33A0073916F /* SingletonDialog.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

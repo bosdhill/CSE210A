@@ -4,8 +4,8 @@ import android.content.Context
 import android.content.DialogInterface
 import android.util.Log
 
-class SingletonDialog {
-    private var TAG = SingletonDialog::class.simpleName
+class Dialog {
+    private var TAG = Dialog::class.simpleName
     private var dialog : AlertDialog? = null
 
     fun show(context: Context, listener: DialogInterface.OnClickListener?, title: String, body: String) {
