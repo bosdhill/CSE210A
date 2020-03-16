@@ -11,7 +11,6 @@ class Dialog {
     fun show(context: Context, listener: DialogInterface.OnClickListener?, title: String, body: String, canceleable: Boolean) {
         dialog?.let {
             dialog!!.dismiss()
-            dialog = null
         }
         Log.i(TAG, "show")
         val alert = AlertDialog.Builder(context)

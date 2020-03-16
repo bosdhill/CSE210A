@@ -157,9 +157,6 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
     override fun onHypeInstanceLost(instance: Instance, error: Error) {
         Log.i(TAG, String.format("Hype lost instance: %s [%s]", instance.stringIdentifier,
                 error.toString()))
-        // This instance is no longer available for communicating. If the instance
-        // is somehow being tracked, such as by a map of instances, this would be
-        // the proper time for cleanup.
         resolvedInstance = null
         runOnUiThread {
             dialog.show(this@MainActivity, findNewInstance()!!,
@@ -167,7 +164,7 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
         }
     }
 
-    fun setNewInstance(instance: Instance): DialogInterface.OnClickListener {
+    fun resolveListener(instance: Instance): DialogInterface.OnClickListener {
         var listener : DialogInterface.OnClickListener = DialogInterface.OnClickListener {
             _, _ ->
             Log.d(TAG, "Hype will communicate with instance")
@@ -178,10 +175,8 @@ class MainActivity : AppCompatActivity(), StateObserver, NetworkObserver, Messag
 
     override fun onHypeInstanceResolved(instance: Instance) {
         Log.i(TAG, String.format("Hype resolved instance: %s", instance.stringIdentifier))
-        // At this point the instance is ready to communicate. Sending and receiving
-        // content is possible at any time now.
         runOnUiThread {
-            dialog.show(this@MainActivity, setNewInstance(instance), RESOLVED_INSTANCE_TITLE,
+            dialog.show(this@MainActivity, resolveListener(instance), RESOLVED_INSTANCE_TITLE,
                     String.format("Instance found: %s\nDo you wish to communicate?", instance.stringIdentifier, false), false)
         }
     }

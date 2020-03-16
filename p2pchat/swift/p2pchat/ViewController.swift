@@ -3,7 +3,7 @@ import MessageKit
 import Hype
 
 class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserver, HYPMessageObserver  {
-    
+
     var messages: [Message] = []
     var member: Member!
     var resolvedInstance: HYPInstance!
@@ -22,7 +22,7 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
     var FAILED_STARTING_TITLE: String = "Hype failed starting"
     var LOST_INSTANCE_TITLE: String = "Hype instance lost"
     var ANIMATED: Bool = false
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         messagesCollectionView.messagesDataSource = self
@@ -31,11 +31,11 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
         messagesCollectionView.messagesDisplayDelegate = self
         requestHypeToStart()
     }
-    
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
     }
-    
+
     func requestHypeToStart() -> () {
         HYP.add(self as HYPStateObserver)
         HYP.add(self as HYPNetworkObserver)
@@ -43,7 +43,7 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
         HYP.setAppIdentifier("c990ae8f")
         HYP.start()
     }
-    
+
     func hypeDidStart() {
         NSLog("Hype started!")
         DispatchQueue.main.async {
@@ -51,12 +51,12 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
                          animated: self.ANIMATED, completion: nil)
         }
     }
-    
+
     func hypeDidStopWithError(_ error: HYPError!) {
         let description:String! = error == nil ? "" : error.description
         NSLog("Hype stopped [%@]", description)
     }
-    
+
     func hypeDidFailStartingWithError(_ error: HYPError!) {
         NSLog("Hype failed starting [%@]", error.description)
         NSLog("Hype code [%d]", error.code.rawValue)
@@ -67,7 +67,7 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
                          animated: self.ANIMATED, completion: nil)
         }
     }
-    
+
     func hypeDidChangeState() {
         switch HYP.state().rawValue {
         case 0: NSLog("Hype is in idle state")
@@ -77,26 +77,26 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
         default: break
         }
     }
-    
+
     func hypeDidBecomeReady() {
         NSLog("Hype is ready")
         // Where're here due to a failed start request, try again
         requestHypeToStart()
     }
-    
+
     func hypeDidRequestAccessToken(withUserIdentifier userIdentifier: UInt) -> String! {
         return "3905669394fa2533"
     }
-    
+
     func hypeDidFind(_ instance: HYPInstance!) {
         NSLog("Hype did find instance %@", instance.appStringIdentifier!)
     }
-    
+
     func noInstanceHandler(_ alertAction:UIAlertAction) -> () {
         NSLog("Hype no instance yes clicked")
         return self.requestHypeToStart()
     }
-    
+
     func hypeDidLose(_ instance: HYPInstance!, error: HYPError!) {
         NSLog("Hype did lost instance %@ [%s]", instance.appStringIdentifier!, error.description)
         let message = String(format: "Lost instance: %@\n" + self.NO_INSTANCE_BODY, instance.appStringIdentifier!)
@@ -106,27 +106,28 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
                          animated: self.ANIMATED, completion: nil)
         }
     }
-    
+
     func resolveHandler(instance: HYPInstance!) -> (_ alertAction:UIAlertAction) -> () {
         return {_ in
             self.resolvedInstance = instance
             NSLog("Hype will communicate with instance %@", instance.appStringIdentifier!)
         }
     }
-    
+
     func hypeDidResolve(_ instance: HYPInstance!) {
         NSLog("Hype resolved instance: %@", instance.stringIdentifier!)
         let message = String(format: "Instance found: %@\nDo you wish to communicate?", instance.stringIdentifier!)
         DispatchQueue.main.async {
             self.present(self.dialog.show(title: self.RESOLVED_INSTANCE_TITLE, message: message,
-                                          handler: self.resolveHandler(instance: instance)), animated: self.ANIMATED, completion: nil)
+                                          handler: self.resolveHandler(instance: instance)),
+                                          animated: self.ANIMATED, completion: nil)
         }
     }
-    
+
     func hypeDidFailResolving(_ instance: HYPInstance!, error: HYPError!) {
         NSLog("Hype did fail resolving instance %@ [%s]", instance.appStringIdentifier!, error.description)
     }
-    
+
     func hypeDidReceive(_ message: HYPMessage!, from fromInstance: HYPInstance!) {
         NSLog("Hype did receive %d %@", message.info.identifier, fromInstance.appStringIdentifier!)
         let msg = (NSString(data: (message?.data)!, encoding: String.Encoding.utf8.rawValue)! as String)
@@ -136,7 +137,7 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
                 UIColor(displayP3Red: 1.0, green: 1.0, blue: 0.0, alpha: 1.0)), text: msg, messageId: "32"))
         }
     }
-    
+
     func hypeDidFailSendingMessage(_ messageInfo: HYPMessageInfo!, to toInstance: HYPInstance!, error: HYPError!) {
         NSLog("Hype did fail sending  %d %@ %s", messageInfo.identifier, toInstance.appStringIdentifier!, error.description)
         let message = String(format: "Could not send to %@", toInstance.appStringIdentifier!)
@@ -144,15 +145,15 @@ class ViewController: MessagesViewController, HYPStateObserver, HYPNetworkObserv
             self.present(self.dialog.show(title: self.SENT_FAILED_TITLE, message: message, handler: nil), animated: self.ANIMATED, completion: nil)
         }
     }
-    
+
     func showMessage(message: Message) {
         self.messages.append(message)
         self.messagesCollectionView.reloadData()
         self.messagesCollectionView.scrollToBottom(animated: true)
     }
-    
+
     func noop(_: Any) {}
-    
+
     func hypeDidDeliverMessage(_ messageInfo: HYPMessageInfo!, to toInstance: HYPInstance!, progress: Float, complete: Bool) {
         if complete {
             NSLog("Hype delivered message %d %@ %f", messageInfo.identifier, toInstance.appStringIdentifier!, progress)
@@ -168,21 +169,21 @@ extension ViewController: MessagesDataSource {
     func numberOfSections(in messagesCollectionView: MessagesCollectionView) -> Int {
         return messages.count
     }
-    
+
     func currentSender() -> Sender {
         return Sender(id: "Bobby", displayName: "Bobby")
     }
-    
+
     func messageForItem(at indexPath: IndexPath,
                         in messagesCollectionView: MessagesCollectionView) -> MessageType {
-        
+
         return messages[indexPath.section]
     }
-    
+
     func messageTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
         return 12
     }
-    
+
     func messageTopLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
         return NSAttributedString(
             string: message.sender.displayName,
@@ -205,7 +206,7 @@ extension ViewController: MessagesDisplayDelegate {
         for message: MessageType,
         at indexPath: IndexPath,
         in messagesCollectionView: MessagesCollectionView) {
-        
+
         let message = messages[indexPath.section]
         let color = message.member.color
         avatarView.backgroundColor = color
@@ -217,7 +218,7 @@ extension ViewController: MessageInputBarDelegate {
         sendMessage(text: text)
         inputBar.inputTextView.text = ""
     }
-    
+
     func sendMessage(text: String) {
         let col = UIColor(displayP3Red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
         let m = Member(name: "Bobby", color: col)
@@ -225,9 +226,9 @@ extension ViewController: MessageInputBarDelegate {
             member: m,
             text: text,
             messageId: UUID().uuidString)
-        
+
         let data: Data? = text.data(using: String.Encoding.utf8)
-        
+
         if self.resolvedInstance != nil {
             DispatchQueue.main.async {
                 self.present(self.dialog.show(title: self.SENT_TITLE, message: "", handler: nil),

@@ -184,9 +184,6 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
     @Override
     public void onHypeInstanceLost(Instance instance, Error error) {
         Log.i(TAG, String.format("Hype lost instance: %s [%s]", instance.getStringIdentifier(), error.toString()));
-        // This instance is no longer available for communicating. If the instance
-        // is somehow being tracked, such as by a map of instances, this would be
-        // the proper time for cleanup.
         resolvedInstance = null;
         runOnUiThread(new Runnable() {
             @Override
@@ -197,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
         });
     }
 
-    private DialogInterface.OnClickListener setNewInstance(final Instance instance) {
+    private DialogInterface.OnClickListener resolveListener(final Instance instance) {
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -210,12 +207,10 @@ public class MainActivity extends AppCompatActivity implements StateObserver, Ne
     @Override
     public void onHypeInstanceResolved(final Instance instance) {
         Log.i(TAG, String.format("Hype resolved instance: %s", instance.getStringIdentifier()));
-        // At this point the instance is ready to communicate. Sending and receiving
-        // content is possible at any time now.
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-            dialog.show(MainActivity.this, setNewInstance(instance), RESOLVED_INSTANCE_TITLE,
+            dialog.show(MainActivity.this, resolveListener(instance), RESOLVED_INSTANCE_TITLE,
                     String.format("Instance found: %s\nDo you wish to communicate?", instance.getStringIdentifier()), false);
             }
         });

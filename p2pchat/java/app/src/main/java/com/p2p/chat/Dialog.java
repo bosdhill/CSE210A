@@ -12,7 +12,6 @@ public class Dialog {
                      String body, boolean cancelable) {
         if (dialog != null) {
             dialog.dismiss();
-            dialog = null;
         }
         Log.i(TAG, "show");
         AlertDialog.Builder alert = new AlertDialog.Builder(context)
